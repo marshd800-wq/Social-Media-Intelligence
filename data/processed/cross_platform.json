@@ -1,0 +1,295 @@
+{
+  "platform_summary": {
+    "Instagram": {
+      "count": 132,
+      "avg_reach": 176,
+      "median_reach": 86,
+      "avg_views": 276,
+      "avg_interactions": 10.3,
+      "avg_engagement_rate": 0.0675,
+      "avg_comments": 1.12,
+      "total_reach": 23250
+    },
+    "TikTok": {
+      "count": 34,
+      "avg_reach": 290,
+      "median_reach": 169,
+      "avg_views": 323,
+      "avg_interactions": 19.4,
+      "avg_engagement_rate": 0.0495,
+      "avg_comments": 0.32,
+      "total_reach": 9863
+    }
+  },
+  "format_by_platform": {
+    "Instagram": {
+      "reel": {
+        "count": 69,
+        "avg_reach": 250,
+        "median_reach": 164,
+        "avg_views": 326,
+        "avg_interactions": 8.6,
+        "avg_engagement_rate": 0.0378,
+        "avg_comments": 1.14,
+        "total_reach": 17244
+      },
+      "carousel": {
+        "count": 26,
+        "avg_reach": 133,
+        "median_reach": 72,
+        "avg_views": 305,
+        "avg_interactions": 22.3,
+        "avg_engagement_rate": 0.138,
+        "avg_comments": 2.23,
+        "total_reach": 3464
+      },
+      "static": {
+        "count": 37,
+        "avg_reach": 69,
+        "median_reach": 40,
+        "avg_views": 162,
+        "avg_interactions": 5.1,
+        "avg_engagement_rate": 0.0733,
+        "avg_comments": 0.3,
+        "total_reach": 2542
+      }
+    },
+    "TikTok": {
+      "reel": {
+        "count": 29,
+        "avg_reach": 327,
+        "median_reach": 247,
+        "avg_views": 365,
+        "avg_interactions": 22.8,
+        "avg_engagement_rate": 0.0581,
+        "avg_comments": 0.38,
+        "total_reach": 9490
+      },
+      "static": {
+        "count": 5,
+        "avg_reach": 75,
+        "median_reach": 97,
+        "avg_views": 80,
+        "avg_interactions": 0,
+        "avg_engagement_rate": 0.0,
+        "avg_comments": 0,
+        "total_reach": 373
+      }
+    }
+  },
+  "tiktok_top_hooks": [
+    {
+      "hook": "ill miss you #atlantarealestate #realtorlife #fyp #atlrealestateagent",
+      "reach": 1901,
+      "views": 2147,
+      "likes": 252,
+      "comments": 0,
+      "theme": "Uncategorized",
+      "url": "https://www.tiktok.com/@dianatheatlrealtor/video/7571838056584465695"
+    },
+    {
+      "hook": "Most people don't get a second chance at a move like this. You're making one of the biggest financial decisions you'll touch in a decade. That's the part I take seriously. The people I work with are b",
+      "reach": 880,
+      "views": 931,
+      "likes": 6,
+      "comments": 0,
+      "theme": "Uncategorized",
+      "url": "https://www.tiktok.com/@dianatheatlrealtor/video/7656279331936718111"
+    },
+    {
+      "hook": "Oops. Sorry not sorry. A deadline is a deadline bookie. And as for that For Sale By Owner, they were gunna call me anyway now I can say sorry by swapping out their sign for a better one. #atlantareale",
+      "reach": 754,
+      "views": 826,
+      "likes": 110,
+      "comments": 3,
+      "theme": "Seller / move-up equity",
+      "url": "https://www.tiktok.com/@dianatheatlrealtor/video/7572767647633247518"
+    },
+    {
+      "hook": "Hey bookie #buyingahouse #atlrealestateagent",
+      "reach": 549,
+      "views": 589,
+      "likes": 57,
+      "comments": 2,
+      "theme": "Buyer / first-time / financing",
+      "url": "https://www.tiktok.com/@dianatheatlrealtor/video/7570781307190398239"
+    },
+    {
+      "hook": "#atlrealestate #atlrealtor #atlantarealestate #interestrates",
+      "reach": 520,
+      "views": 573,
+      "likes": 31,
+      "comments": 0,
+      "theme": "Market stats / education",
+      "url": "https://www.tiktok.com/@dianatheatlrealtor/video/7597890699996040479"
+    },
+    {
+      "hook": "call me #atlrealtor #realestateagent #atlantarealestateagent #georgiarealestateagent",
+      "reach": 493,
+      "views": 528,
+      "likes": 47,
+      "comments": 2,
+      "theme": "Uncategorized",
+      "url": "https://www.tiktok.com/@dianatheatlrealtor/video/7572700368807742750"
+    },
+    {
+      "hook": "No but same #realtorlife #realestate #fyp #atlantarealtor #househunting",
+      "reach": 481,
+      "views": 550,
+      "likes": 43,
+      "comments": 2,
+      "theme": "Uncategorized",
+      "url": "https://www.tiktok.com/@dianatheatlrealtor/video/7571148360875298078"
+    },
+    {
+      "hook": "If you're planning a move to ATLANTA, I'd love to help you navigate finding the perfect place to call home. Diana Marsh - REALTOR Berkshire Hathaway HomeServices GA Properties Atlanta",
+      "reach": 466,
+      "views": 624,
+      "likes": 27,
+      "comments": 0,
+      "theme": "Uncategorized",
+      "url": "https://www.tiktok.com/@dianatheatlrealtor/video/7657585479516163359"
+    }
+  ],
+  "tiktok_themes": {
+    "Market stats / education": {
+      "count": 2,
+      "avg_reach": 406,
+      "avg_er": 0.0332
+    },
+    "Uncategorized": {
+      "count": 13,
+      "avg_reach": 392,
+      "avg_er": 0.0476
+    },
+    "Humor / relatable": {
+      "count": 1,
+      "avg_reach": 319,
+      "avg_er": 0.0094
+    },
+    "Buyer / first-time / financing": {
+      "count": 5,
+      "avg_reach": 250,
+      "avg_er": 0.047
+    },
+    "Listing / deal of the day / home tour": {
+      "count": 3,
+      "avg_reach": 222,
+      "avg_er": 0.0087
+    },
+    "Seller / move-up equity": {
+      "count": 8,
+      "avg_reach": 184,
+      "avg_er": 0.0901
+    },
+    "Personal / behind the scenes": {
+      "count": 2,
+      "avg_reach": 124,
+      "avg_er": 0.0034
+    }
+  },
+  "cross_posted_matches": [
+    {
+      "hook": "Most people don't get a second chance at a move like this. Y",
+      "ig_reach": 359,
+      "tk_reach": 880,
+      "ig_er": 0.0279,
+      "tk_er": 0.0068,
+      "winner_reach": "TikTok"
+    },
+    {
+      "hook": "Describe your job and make it sound illegal... I'll go first",
+      "ig_reach": 618,
+      "tk_reach": 319,
+      "ig_er": 0.0178,
+      "tk_er": 0.0094,
+      "winner_reach": "Instagram"
+    },
+    {
+      "hook": "This is what selling a luxury home in Metro Atlanta actually",
+      "ig_reach": 314,
+      "tk_reach": 349,
+      "ig_er": 0.0796,
+      "tk_er": 0.0172,
+      "winner_reach": "TikTok"
+    },
+    {
+      "hook": "If you've been waiting for the right moment to jump into a n",
+      "ig_reach": 202,
+      "tk_reach": 313,
+      "ig_er": 0.0347,
+      "tk_er": 0.016,
+      "winner_reach": "TikTok"
+    },
+    {
+      "hook": "Been in your home 3 to 5 years? Do NOT make a move until you",
+      "ig_reach": 257,
+      "tk_reach": 4,
+      "ig_er": 0.0233,
+      "tk_er": 0.0,
+      "winner_reach": "Instagram"
+    },
+    {
+      "hook": "Been in your home 3 to 5 years? Do NOT make a move until you",
+      "ig_reach": 257,
+      "tk_reach": 2,
+      "ig_er": 0.0233,
+      "tk_er": 0.5,
+      "winner_reach": "Instagram"
+    },
+    {
+      "hook": "You've worked too hard to settle for an average homebuying e",
+      "ig_reach": 255,
+      "tk_reach": 190,
+      "ig_er": 0.051,
+      "tk_er": 0.0053,
+      "winner_reach": "Instagram"
+    },
+    {
+      "hook": "POV: you want way more space for your money. 6 bedrooms and ",
+      "ig_reach": 250,
+      "tk_reach": 148,
+      "ig_er": 0.084,
+      "tk_er": 0.0068,
+      "winner_reach": "Instagram"
+    },
+    {
+      "hook": "Not one cold call in three years. Every client I have ever h",
+      "ig_reach": 247,
+      "tk_reach": 101,
+      "ig_er": 0.0567,
+      "tk_er": 0.0,
+      "winner_reach": "Instagram"
+    },
+    {
+      "hook": "A Modern Farmhouse like this does not come around often. Flo",
+      "ig_reach": 237,
+      "tk_reach": 57,
+      "ig_er": 0.038,
+      "tk_er": 0.0,
+      "winner_reach": "Instagram"
+    },
+    {
+      "hook": "The seller put real thought and care into building this home",
+      "ig_reach": 139,
+      "tk_reach": 24,
+      "ig_er": 0.036,
+      "tk_er": 0.0,
+      "winner_reach": "Instagram"
+    },
+    {
+      "hook": "Most sellers in Atlanta don't lose on price. They lose on pr",
+      "ig_reach": 118,
+      "tk_reach": 104,
+      "ig_er": 0.0593,
+      "tk_er": 0.0,
+      "winner_reach": "Instagram"
+    }
+  ],
+  "dormant_platforms": {
+    "Facebook": "129 posts, median organic reach = 1 (max 11). Effectively no distribution.",
+    "YouTube": "3 videos total (627 / 49 / 23 views). Channel barely used.",
+    "LinkedIn": "8 posts, 16-83 impressions each, near-zero reactions.",
+    "Pinterest": "Pins publishing with 0 impressions and 0 saves. Inactive."
+  }
+}
