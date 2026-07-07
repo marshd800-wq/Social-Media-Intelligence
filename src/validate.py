@@ -9,7 +9,7 @@ from score import score_content
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-d = json.load(open(os.path.join(ROOT, "data", "processed", "dataset.json"), encoding="utf-8"))
+d = json.load(open(os.path.join(ROOT, "data", "processed", "multiplatform_dataset.json"), encoding="utf-8"))
 scored = [r for r in d if r["reach"]]
 
 
@@ -33,7 +33,8 @@ def spearman(x, y):
 def main():
     preds, er, reach = [], [], []
     for r in scored:
-        preds.append(score_content(r["hook"], r["caption"], r["content_type"])["score"])
+        preds.append(score_content(r["hook"], r["caption"], r["content_type"],
+                                   r.get("platform", "Instagram"))["score"])
         er.append(r["engagement_rate"] or 0)
         reach.append(r["reach"])
     paired = sorted(zip(preds, reach, er), reverse=True)

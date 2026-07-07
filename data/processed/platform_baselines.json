@@ -1,0 +1,44 @@
+{
+  "Instagram": {
+    "n": 132,
+    "avg_reach": 176,
+    "avg_caption_words": 127,
+    "avg_hashtags": 3.2,
+    "type_perf": {
+      "reel": 51.7,
+      "carousel": 59.6,
+      "static": 40.0
+    },
+    "theme_perf": {
+      "Find Home Anywhere (global series)": 40.1,
+      "Seller / move-up equity": 44.8,
+      "Humor / relatable": 68.5,
+      "Personal / behind the scenes": 67.5,
+      "Listing / deal of the day / home tour": 60.6,
+      "Buyer / first-time / financing": 55.3,
+      "Relocation to Atlanta": 83.4,
+      "Market stats / education": 66.3,
+      "Uncategorized": 49.7,
+      "Lifestyle / seasonal / home tips": 26.7
+    }
+  },
+  "TikTok": {
+    "n": 34,
+    "avg_reach": 290,
+    "avg_caption_words": 32,
+    "avg_hashtags": 1.3,
+    "type_perf": {
+      "reel": 54.0,
+      "static": 26.6
+    },
+    "theme_perf": {
+      "Humor / relatable": 48.2,
+      "Market stats / education": 61.0,
+      "Uncategorized": 53.9,
+      "Seller / move-up equity": 41.7,
+      "Listing / deal of the day / home tour": 44.8,
+      "Buyer / first-time / financing": 57.1,
+      "Personal / behind the scenes": 37.7
+    }
+  }
+}
