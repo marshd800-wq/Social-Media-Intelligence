@@ -64,9 +64,9 @@
 
 ## 4. Language that separates winners from losers
 Words/phrases that appear in **top-quartile** captions but are largely absent from **bottom-quartile** captions:
-**Words:** `metro`, `built`, `without`, `budget`, `trusted`, `good`, `knows`, `job`, `stepping`, `doesn’t`, `happen`, `opportunity`, `invest`, `that’s`, `side`, `i’ve`, `close`, `grateful`
+**Words:** `good`, `only`, `opportunity`, `budget`, `close`, `doesn’t`, `metro`, `side`, `without`, `built`, `dreaming`, `excited`, `grateful`, `happen`, `imagine`, `invest`, `i’ve`, `job`
 
-**Phrases:** `metro atlanta`, `estate agent`, `home metro`, `help people`, `moving day`, `don’t know`, `time buyers`, `first time`, `amazing first`, `i’m glad`, `start finish`, `make magic`, `estate journey`, `last year`, `next i’m`, `what’s next`
+**Phrases:** `first time`, `metro atlanta`, `estate journey`, `help make`, `i’m excited`, `you’re dreaming`, `along journey`, `amazing first`, `based atlanta`, `buying home`, `buying process`, `closing day`, `create stability`, `don’t know`, `estate agent`, `exploring options`
 
 **Read:** Winning captions talk about **Metro Atlanta specifically**, **first-time buyers**, being **trusted / built**, **opportunity**, **budget**, **what's next**, and personal **gratitude** — concrete, local, and story-driven. Losing captions lean on generic travelogue and seasonal filler.
 
