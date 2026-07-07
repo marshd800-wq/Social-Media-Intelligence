@@ -166,8 +166,11 @@ def differential(fn, min_top=3):
             "top_share": round(top_share, 3), "bottom_share": round(bot_share, 3),
             "lift": round(lift, 2) if lift != float("inf") else "only_top",
         })
-    # sort: infinite lift first, then by lift
-    out.sort(key=lambda d: (d["lift"] == "only_top", d["lift"] if d["lift"] != "only_top" else 0), reverse=True)
+    # sort: infinite lift first, then by lift — fully deterministic tie-breaking
+    # (term as final key) so identical input always yields identical output.
+    def _ln(d):
+        return 1e9 if d["lift"] == "only_top" else d["lift"]
+    out.sort(key=lambda d: (-_ln(d), -d["top_docs"], d["term"]))
     return out[:25]
 
 phrase_diff_words = differential(tokens)

@@ -64,9 +64,9 @@
 
 ## 4. Language that separates winners from losers
 Words/phrases that appear in **top-quartile** captions but are largely absent from **bottom-quartile** captions:
-**Words:** `built`, `without`, `metro`, `budget`, `trusted`, `job`, `good`, `knows`, `stepping`, `doesn’t`, `happen`, `opportunity`, `side`, `that’s`, `invest`, `close`, `i’ve`, `imagine`
+**Words:** `metro`, `built`, `without`, `budget`, `trusted`, `good`, `knows`, `job`, `stepping`, `doesn’t`, `happen`, `opportunity`, `invest`, `that’s`, `side`, `i’ve`, `close`, `grateful`
 
-**Phrases:** `metro atlanta`, `estate agent`, `home metro`, `help people`, `moving day`, `don’t know`, `time buyers`, `first time`, `amazing first`, `i’m glad`, `start finish`, `last year`, `make magic`, `estate journey`, `what’s next`, `home feels`
+**Phrases:** `metro atlanta`, `estate agent`, `home metro`, `help people`, `moving day`, `don’t know`, `time buyers`, `first time`, `amazing first`, `i’m glad`, `start finish`, `make magic`, `estate journey`, `last year`, `next i’m`, `what’s next`
 
 **Read:** Winning captions talk about **Metro Atlanta specifically**, **first-time buyers**, being **trusted / built**, **opportunity**, **budget**, **what's next**, and personal **gratitude** — concrete, local, and story-driven. Losing captions lean on generic travelogue and seasonal filler.
 
@@ -142,9 +142,9 @@ Words/phrases that appear in **top-quartile** captions but are largely absent fr
 | Engagement rate | 0.1239 | 0 |
 
 ## 8. Predictive scoring model — back-test
-- Spearman(predicted score, reach) = **0.526**
-- Spearman(predicted score, engagement rate) = **0.333**
-- Posts the model flags **top-quartile** averaged **257 reach** vs **67** for predicted-bottom — a **3.8× separation**.
+- Spearman(predicted score, reach) = **0.483**
+- Spearman(predicted score, engagement rate) = **0.305**
+- Posts the model flags **top-quartile** averaged **297 reach** vs **67** for predicted-bottom — a **4.4× separation**.
 
 Score any draft before posting:
 ```bash

@@ -821,15 +821,47 @@
   ],
   "phrase_differential_words": [
     {
-      "term": "built",
-      "top_docs": 3,
+      "term": "good",
+      "top_docs": 5,
       "bottom_docs": 0,
-      "top_share": 0.091,
+      "top_share": 0.152,
       "bottom_share": 0.0,
       "lift": "only_top"
     },
     {
-      "term": "without",
+      "term": "only",
+      "top_docs": 5,
+      "bottom_docs": 0,
+      "top_share": 0.152,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "opportunity",
+      "top_docs": 5,
+      "bottom_docs": 0,
+      "top_share": 0.152,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "budget",
+      "top_docs": 4,
+      "bottom_docs": 0,
+      "top_share": 0.121,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "close",
+      "top_docs": 4,
+      "bottom_docs": 0,
+      "top_share": 0.121,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "doesn’t",
       "top_docs": 4,
       "bottom_docs": 0,
       "top_share": 0.121,
@@ -845,78 +877,6 @@
       "lift": "only_top"
     },
     {
-      "term": "budget",
-      "top_docs": 4,
-      "bottom_docs": 0,
-      "top_share": 0.121,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "trusted",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "job",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "good",
-      "top_docs": 5,
-      "bottom_docs": 0,
-      "top_share": 0.152,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "knows",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "stepping",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "doesn’t",
-      "top_docs": 4,
-      "bottom_docs": 0,
-      "top_share": 0.121,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "happen",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "opportunity",
-      "top_docs": 5,
-      "bottom_docs": 0,
-      "top_share": 0.152,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
       "term": "side",
       "top_docs": 4,
       "bottom_docs": 0,
@@ -925,23 +885,7 @@
       "lift": "only_top"
     },
     {
-      "term": "that’s",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "invest",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "close",
+      "term": "without",
       "top_docs": 4,
       "bottom_docs": 0,
       "top_share": 0.121,
@@ -949,7 +893,7 @@
       "lift": "only_top"
     },
     {
-      "term": "i’ve",
+      "term": "built",
       "top_docs": 3,
       "bottom_docs": 0,
       "top_share": 0.091,
@@ -957,23 +901,7 @@
       "lift": "only_top"
     },
     {
-      "term": "imagine",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "grateful",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "see",
+      "term": "dreaming",
       "top_docs": 3,
       "bottom_docs": 0,
       "top_share": 0.091,
@@ -989,15 +917,55 @@
       "lift": "only_top"
     },
     {
-      "term": "only",
-      "top_docs": 5,
+      "term": "grateful",
+      "top_docs": 3,
       "bottom_docs": 0,
-      "top_share": 0.152,
+      "top_share": 0.091,
       "bottom_share": 0.0,
       "lift": "only_top"
     },
     {
-      "term": "dreaming",
+      "term": "happen",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "imagine",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "invest",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "i’ve",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "job",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "knows",
       "top_docs": 3,
       "bottom_docs": 0,
       "top_share": 0.091,
@@ -1006,6 +974,38 @@
     },
     {
       "term": "potential",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "see",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "stepping",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "that’s",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "trusted",
       "top_docs": 3,
       "bottom_docs": 0,
       "top_share": 0.091,
@@ -1023,6 +1023,14 @@
   ],
   "phrase_differential_bigrams": [
     {
+      "term": "first time",
+      "top_docs": 4,
+      "bottom_docs": 0,
+      "top_share": 0.121,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
       "term": "metro atlanta",
       "top_docs": 4,
       "bottom_docs": 0,
@@ -1031,7 +1039,39 @@
       "lift": "only_top"
     },
     {
-      "term": "estate agent",
+      "term": "estate journey",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "help make",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "i’m excited",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "you’re dreaming",
+      "top_docs": 3,
+      "bottom_docs": 0,
+      "top_share": 0.091,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "along journey",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1039,7 +1079,7 @@
       "lift": "only_top"
     },
     {
-      "term": "home metro",
+      "term": "amazing first",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1047,7 +1087,7 @@
       "lift": "only_top"
     },
     {
-      "term": "help people",
+      "term": "based atlanta",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1055,7 +1095,31 @@
       "lift": "only_top"
     },
     {
-      "term": "moving day",
+      "term": "buying home",
+      "top_docs": 2,
+      "bottom_docs": 0,
+      "top_share": 0.061,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "buying process",
+      "top_docs": 2,
+      "bottom_docs": 0,
+      "top_share": 0.061,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "closing day",
+      "top_docs": 2,
+      "bottom_docs": 0,
+      "top_share": 0.061,
+      "bottom_share": 0.0,
+      "lift": "only_top"
+    },
+    {
+      "term": "create stability",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1071,7 +1135,7 @@
       "lift": "only_top"
     },
     {
-      "term": "time buyers",
+      "term": "estate agent",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1079,15 +1143,7 @@
       "lift": "only_top"
     },
     {
-      "term": "first time",
-      "top_docs": 4,
-      "bottom_docs": 0,
-      "top_share": 0.121,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "amazing first",
+      "term": "exploring options",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1095,47 +1151,7 @@
       "lift": "only_top"
     },
     {
-      "term": "i’m glad",
-      "top_docs": 2,
-      "bottom_docs": 0,
-      "top_share": 0.061,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "start finish",
-      "top_docs": 2,
-      "bottom_docs": 0,
-      "top_share": 0.061,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "last year",
-      "top_docs": 2,
-      "bottom_docs": 0,
-      "top_share": 0.061,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "make magic",
-      "top_docs": 2,
-      "bottom_docs": 0,
-      "top_share": 0.061,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "estate journey",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "what’s next",
+      "term": "help people",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1159,7 +1175,7 @@
       "lift": "only_top"
     },
     {
-      "term": "next i’m",
+      "term": "home marsh",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1167,23 +1183,7 @@
       "lift": "only_top"
     },
     {
-      "term": "help make",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "i’m excited",
-      "top_docs": 3,
-      "bottom_docs": 0,
-      "top_share": 0.091,
-      "bottom_share": 0.0,
-      "lift": "only_top"
-    },
-    {
-      "term": "along journey",
+      "term": "home metro",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1191,7 +1191,7 @@
       "lift": "only_top"
     },
     {
-      "term": "options i’m",
+      "term": "i’m glad",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1199,7 +1199,7 @@
       "lift": "only_top"
     },
     {
-      "term": "you’re buying",
+      "term": "last year",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1207,7 +1207,7 @@
       "lift": "only_top"
     },
     {
-      "term": "based atlanta",
+      "term": "located south",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
@@ -1215,7 +1215,7 @@
       "lift": "only_top"
     },
     {
-      "term": "create stability",
+      "term": "make magic",
       "top_docs": 2,
       "bottom_docs": 0,
       "top_share": 0.061,
