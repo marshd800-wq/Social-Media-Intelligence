@@ -1,0 +1,8 @@
+{
+  "n": 132,
+  "spearman_pred_vs_engagement_rate": 0.333,
+  "spearman_pred_vs_reach": 0.526,
+  "predicted_top_quartile_avg_reach": 257,
+  "predicted_bottom_quartile_avg_reach": 67,
+  "reach_separation_x": 3.8
+}
