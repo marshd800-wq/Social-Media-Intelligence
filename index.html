@@ -226,16 +226,22 @@ input.ti:focus,textarea.ti:focus{outline:2px solid var(--accent);outline-offset:
 .kv b{white-space:nowrap}
 .kv:first-child{border-top:0}
 .kv b{font-weight:650}
+.scrim{display:none}
 @media (max-width:960px){
   .app{grid-template-columns:1fr}
-  .side{position:fixed;left:-260px;transition:left .25s;z-index:40;box-shadow:var(--shadow)}
+  .side{position:fixed;top:0;left:-280px;width:260px;height:100dvh;overflow-y:auto;
+    transition:left .25s ease;z-index:60;box-shadow:var(--shadow)}
   .side.open{left:0}
+  .scrim{position:fixed;inset:0;background:rgba(28,20,12,.42);z-index:50;
+    opacity:0;pointer-events:none;transition:opacity .25s}
+  .scrim.on{display:block;opacity:1;pointer-events:auto}
   .g4{grid-template-columns:repeat(2,1fr)}
   .g3,.g2,.scoregrid,.two-col,.two{grid-template-columns:1fr}
   .menu-btn{display:grid!important}
 }
 .menu-btn{display:none;all:unset;cursor:pointer;width:34px;height:34px;border-radius:10px;
   border:1px solid var(--line);place-items:center;color:var(--ink-2)}
+.menu-btn:hover{background:var(--panel-2)}
 .menu-btn svg{width:17px;height:17px}
 </style>
 
@@ -263,6 +269,7 @@ input.ti:focus,textarea.ti:focus{outline:2px solid var(--accent);outline-offset:
       <p style="margin-top:6px"><span class="k">Source</span> &nbsp;Metricool · @dianatheatlrealtor</p>
     </div>
   </aside>
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
 
   <main class="main">
     <header class="top">
@@ -727,21 +734,31 @@ function show(v){
     renderScore();
   }
   document.getElementById('side').classList.remove('open');
+  var _sc=document.getElementById('scrim'); if(_sc)_sc.classList.remove('on');
   window.scrollTo({top:0,behavior:'instant'in document.body.style?'instant':'auto'});
 }
 document.querySelectorAll('#nav button').forEach(b=>b.insertAdjacentHTML('afterbegin',ICO[b.dataset.ico]||''));
 document.getElementById('menu').innerHTML=ICO.menu;
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)show(b.dataset.v);});
-document.getElementById('menu').addEventListener('click',()=>document.getElementById('side').classList.toggle('open'));
 
-/* theme toggle */
+/* mobile menu: open/close with scrim + Escape + tap-away */
+const side=document.getElementById('side'), scrim=document.getElementById('scrim');
+function setMenu(open){side.classList.toggle('open',open);scrim.classList.toggle('on',open);}
+window.closeMenu=()=>setMenu(false);
+document.getElementById('menu').addEventListener('click',()=>setMenu(!side.classList.contains('open')));
+scrim.addEventListener('click',()=>setMenu(false));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false);});
+
+/* theme toggle — defaults to light, remembers the visitor's choice */
 const tgl=document.getElementById('tgl');
-function curTheme(){const r=document.documentElement.getAttribute('data-theme');
-  if(r)return r;return matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+function readSaved(){try{return localStorage.getItem('dm-theme');}catch(e){return null;}}
+function saveTheme(t){try{localStorage.setItem('dm-theme',t);}catch(e){}}
+function curTheme(){return document.documentElement.getAttribute('data-theme')||'light';}
 function setTgl(){tgl.innerHTML=curTheme()==='dark'?ICO.sun:ICO.moon||ICO.sun;}
 ICO.moon=icon('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>');
 tgl.addEventListener('click',()=>{const n=curTheme()==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',n);setTgl();});
+  document.documentElement.setAttribute('data-theme',n);saveTheme(n);setTgl();});
+document.documentElement.setAttribute('data-theme', readSaved()||'light');   // light by default
 setTgl();
 show('overview');
 </script>
