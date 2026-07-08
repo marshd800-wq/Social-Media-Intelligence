@@ -203,9 +203,15 @@ label.fld{display:block;font-size:11.5px;color:var(--ink-2);font-weight:600;marg
 .seg button[data-t="carousel"].on{background:var(--carousel)}
 .seg button[data-t="static"].on{background:var(--static);color:#fff}
 .seg button[data-p].on{background:var(--on);color:#fff}
-input.ti,textarea.ti{width:100%;background:var(--inset);border:1px solid var(--line);color:var(--ink);
+input.ti,textarea.ti,select.ti{width:100%;background:var(--inset);border:1px solid var(--line);color:var(--ink);
   border-radius:10px;padding:11px 12px;font-family:inherit;font-size:13.5px;margin-bottom:16px;resize:vertical}
-input.ti:focus,textarea.ti:focus{outline:2px solid var(--accent);outline-offset:1px;background:var(--panel)}
+input.ti:focus,textarea.ti:focus,select.ti:focus{outline:2px solid var(--accent);outline-offset:1px;background:var(--panel)}
+button.primary{all:unset;cursor:pointer;background:var(--accent);color:#fff;font-weight:600;font-size:13px;
+  padding:11px 16px;border-radius:10px;text-align:center;white-space:nowrap}
+button.primary:hover{background:var(--accent-strong)}
+button.primary:disabled{opacity:.45;cursor:not-allowed}
+.linkbtn{all:unset;cursor:pointer;color:var(--accent);font-weight:600;text-decoration:underline}
+.linkbtn:hover{color:var(--accent-strong)}
 .gauge{display:grid;place-items:center;text-align:center;padding:6px 0 4px}
 .gauge .val{font-size:44px;font-weight:700;letter-spacing:-.03em;line-height:1}
 .gauge .tier{font-size:12px;font-weight:600;margin-top:8px;padding:5px 11px;border-radius:999px}
@@ -437,6 +443,8 @@ function scoreBg(s){return s>=70?'var(--good-soft)':s>=55?'var(--accent-soft)':s
 /* ---------- views ---------- */
 const X=JSON.parse(document.getElementById('xdata').textContent);
 const QUEUE=JSON.parse(document.getElementById('queue').textContent);
+let IDEAS=QUEUE.map(q=>({...q,pageId:null}));   // live drafts (from /api) replace these when connected
+let LIVE=false, CURPAGE=null;
 const PLATCOL={Instagram:'var(--carousel)',TikTok:'var(--static)'};
 const CT=DATA.content_type, TH=DATA.themes, V=DATA.val;
 const bestFmt=Object.entries(CT).sort((a,b)=>b[1].perf-a[1].perf)[0];
@@ -617,24 +625,86 @@ function viewLeaderboard(){
   </div>`;
 }
 
-function viewScore(){
-  const q=QUEUE.slice().sort((a,b)=>b.s-a.s);
-  const ideaRows=q.map((d,i)=>`
+function ideaRowsHTML(){
+  return IDEAS.slice().sort((a,b)=>b.s-a.s).map((d,i)=>`
     <div class="row idea" data-i="${i}" tabindex="0" role="button">
       <div class="score-badge" style="color:${scoreColor(d.s)};background:${scoreBg(d.s)}">${d.s}</div>
       <div class="hk"><a>${esc(d.h)}</a>
         <div class="mrow"><span class="pill ${d.p==='TikTok'?'static':'carousel'}">${d.p}</span>
-          <span>${esc(d.th.split(' (')[0])}</span>${d.tr?'<span>· CTA '+esc(d.tr)+'</span>':''}
-          ${d.ob?'<span class="pill crit">⚠ off-brand</span>':''}</div></div>
+          <span>${esc((d.th||'').split(' (')[0])}</span>${d.tr?'<span>· CTA '+esc(d.tr)+'</span>':''}
+          ${d.ob?'<span class="pill crit">⚠ off-brand</span>':''}
+          ${d.pageId?'<span class="pill good">live</span>':''}</div></div>
       <span class="loadbtn">Load →</span></div>`).join('');
+}
+function renderIdeas(){
+  const list=document.getElementById('ideaList'); if(list)list.innerHTML=ideaRowsHTML();
+  const b=document.getElementById('liveBadge');
+  if(b)b.innerHTML=LIVE?'<span class="pill good">● Live from Notion</span>'
+    :'<span class="mini">Snapshot · <button id="refreshLive" class="linkbtn">connect &amp; refresh</button></span>';
+  const c=document.getElementById('ideaCount'); if(c)c.textContent=IDEAS.length;
+  wireIdeaClicks();
+}
+function wireIdeaClicks(){
+  document.querySelectorAll('#ideaList .idea').forEach(el=>{
+    el.onclick=()=>loadIdea(+el.dataset.i);
+    el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();loadIdea(+el.dataset.i);}};});
+}
+function loadIdea(i){const d=IDEAS.slice().sort((a,b)=>b.s-a.s)[i];if(!d)return;
+  document.querySelectorAll('#platseg button').forEach(x=>x.classList.toggle('on',x.dataset.p===d.p));
+  document.getElementById('hk').value=d.h;document.getElementById('cp').value=d.c;
+  document.getElementById('editorttl').textContent='Improving: '+(d.nm||'draft').replace(/^[PES] \| /,'').slice(0,42);
+  CURPAGE=d.pageId||null;
+  const sb=document.getElementById('sendBtn'), sh=document.getElementById('sendHint');
+  if(sb){sb.disabled=!CURPAGE;} if(sh){sh.textContent=CURPAGE?'— updates this draft in your Content Queue':'— connect Notion (live) to enable';}
+  const sm=document.getElementById('sendMsg'); if(sm)sm.textContent='';
+  renderScore();
+  document.getElementById('editorttl').scrollIntoView({behavior:'smooth',block:'start'});}
+async function refreshLive(loud){
+  const badge=document.getElementById('liveBadge');
+  if(loud&&badge)badge.innerHTML='<span class="mini">Connecting…</span>';
+  try{
+    const r=await fetch('/api/drafts',{cache:'no-store'}); const j=await r.json();
+    if(!j.configured){LIVE=false;renderIdeas();return;}
+    if(j.error)throw new Error(j.error);
+    const off=t=>/flight attendant|delta|started everywhere else/i.test(t);
+    const meta=t=>/i appreciate/i.test(t)&&/(clarif|brief|flag|reaching out|i need)/i.test(t);
+    const map={};
+    (j.drafts||[]).forEach(d=>{const t=(d.hook||'')+' '+(d.caption||''); if(!d.caption||meta(t))return;
+      const plat=/tiktok/i.test(d.platform||'')?'TikTok':'Instagram';
+      const res=scoreContent(d.hook||d.caption.slice(0,60), d.caption, 'reel', plat);
+      const key=(d.hook||d.caption).toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,40);
+      const rec={h:(d.hook||d.caption.slice(0,80)).slice(0,120),c:d.caption,p:plat,s:res.score,t:res.tier,
+        th:res.detected_theme,ob:off(t),tr:d.trigger||'',nm:d.name||'',pageId:d.pageId};
+      if(!map[key]||rec.s>map[key].s)map[key]=rec;});
+    IDEAS=Object.values(map).sort((a,b)=>b.s-a.s); LIVE=true; renderIdeas();
+    const f=document.getElementById('ideaFoot');
+    if(f)f.innerHTML='Live from your NOVA Content Queue · off-brand flagged, non-content filtered.';
+  }catch(e){LIVE=false;renderIdeas();
+    const f=document.getElementById('ideaFoot'); if(f&&loud)f.textContent='Could not reach Notion: '+e.message;}
+}
+async function sendToNova(){
+  if(!CURPAGE)return;
+  const btn=document.getElementById('sendBtn'), msg=document.getElementById('sendMsg');
+  const status=document.getElementById('sendStatus').value, date=document.getElementById('sendDate').value;
+  btn.disabled=true; msg.textContent='Sending…';
+  try{
+    const r=await fetch('/api/schedule',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pageId:CURPAGE,caption:document.getElementById('cp').value,status,scheduledDate:date||null})});
+    const j=await r.json();
+    if(j.ok){msg.innerHTML='<span style="color:var(--good)">✓ Sent — set to <b>'+esc(status)+'</b>'+(date?' for '+date:'')+' in your Content Queue.</span>';
+      setTimeout(()=>refreshLive(false),700);}
+    else{msg.innerHTML='<span style="color:var(--crit)">'+esc(j.error||'Failed')+'</span>';btn.disabled=false;}
+  }catch(e){msg.innerHTML='<span style="color:var(--crit)">'+esc(e.message)+'</span>';btn.disabled=false;}
+}
+function viewScore(){
   return `
   <div class="card" style="margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
-      <h3>Your stored ideas &nbsp;<span class="mini">${q.length} from the NOVA Content Queue</span></h3>
-      <span class="mini">Snapshot · refreshed on data pull</span></div>
-    <p class="cap">Ranked by predicted performance. Click one to load it into the editor and improve it.</p>
-    <div class="lb">${ideaRows}</div>
-    <p class="mini" style="margin-top:10px">1 draft flagged <b style="color:var(--crit)">off-brand</b> (references employment outside real estate) · 4 non-content rows hidden.</p>
+      <h3>Your stored ideas &nbsp;<span class="mini"><span id="ideaCount">${IDEAS.length}</span> from the NOVA Content Queue</span></h3>
+      <span id="liveBadge"></span></div>
+    <p class="cap">Ranked by predicted performance. Click one to load it into the editor, improve it, then send it forward.</p>
+    <div class="lb" id="ideaList">${ideaRowsHTML()}</div>
+    <p class="mini" id="ideaFoot" style="margin-top:10px">Non-content and off-brand rows are filtered/flagged automatically.</p>
   </div>
   <div class="scoregrid">
     <div class="card">
@@ -654,11 +724,23 @@ function viewScore(){
       <label class="fld" for="hk">Hook / opening line</label>
       <input class="ti" id="hk" placeholder="The job offer was the easy part.">
       <label class="fld" for="cp">Full caption</label>
-      <textarea class="ti" id="cp" rows="7" placeholder="Write the caption... end with a one-word CTA like: Comment ATLANTA and I'll take it from there."></textarea>
+      <textarea class="ti" id="cp" rows="7" placeholder="Write the caption..."></textarea>
+      <div id="sendPanel" style="border-top:1px solid var(--line);margin-top:4px;padding-top:14px">
+        <label class="fld">Send to post <span class="mini" id="sendHint">— select a live draft above to enable</span></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select class="ti" id="sendStatus" style="flex:1;min-width:130px;margin:0">
+            <option value="Approved">Approve</option>
+            <option value="Scheduled" selected>Schedule</option>
+            <option value="Pending Review">Send for review</option>
+          </select>
+          <input class="ti" id="sendDate" type="date" style="flex:1;min-width:150px;margin:0">
+          <button id="sendBtn" class="primary" disabled>Send to NOVA</button>
+        </div>
+        <p class="mini" id="sendMsg" style="margin:8px 0 0"></p>
+      </div>
     </div>
     <div class="card" id="scorecard"></div>
-  </div>
-  <div class="card" style="margin-top:16px"><p class="cap" style="margin:0">Try one of your top hooks, then delete the CTA or pile on hashtags and watch the score move. Rule of thumb: don't produce anything under <b>55</b> without reworking the flagged items.</p></div>`;
+  </div>`;
 }
 
 function renderScore(){
@@ -752,17 +834,11 @@ function show(v){
       document.querySelectorAll('#platseg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderScore();});
     document.getElementById('hk').addEventListener('input',renderScore);
     document.getElementById('cp').addEventListener('input',renderScore);
-    // load a stored idea into the editor
-    function loadIdea(i){const d=QUEUE.slice().sort((a,b)=>b.s-a.s)[i];if(!d)return;
-      document.querySelectorAll('#platseg button').forEach(x=>x.classList.toggle('on',x.dataset.p===d.p));
-      document.getElementById('hk').value=d.h;document.getElementById('cp').value=d.c;
-      document.getElementById('editorttl').textContent='Improving: '+d.nm.replace(/^[PES] \| /,'').slice(0,40);
-      renderScore();document.getElementById('editorttl').scrollIntoView({behavior:'smooth',block:'start'});}
-    wrap.querySelectorAll('.idea').forEach(el=>{
-      el.addEventListener('click',()=>loadIdea(+el.dataset.i));
-      el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();loadIdea(+el.dataset.i);}});});
-    // preload the top idea so the page isn't empty
-    loadIdea(0);
+    document.getElementById('sendBtn').addEventListener('click',sendToNova);
+    document.getElementById('wrap').addEventListener('click',e=>{if(e.target.id==='refreshLive'){e.preventDefault();refreshLive(true);}});
+    renderIdeas();      // wires idea clicks + live badge
+    loadIdea(0);        // preload top idea
+    refreshLive(false); // try to pull live drafts from Notion (silent if not configured)
   }
   document.getElementById('side').classList.remove('open');
   var _sc=document.getElementById('scrim'); if(_sc)_sc.classList.remove('on');
