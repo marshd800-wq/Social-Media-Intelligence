@@ -19,6 +19,16 @@
       "avg_engagement_rate": 0.0495,
       "avg_comments": 0.32,
       "total_reach": 9863
+    },
+    "YouTube": {
+      "count": 3,
+      "avg_reach": 233,
+      "median_reach": 49,
+      "avg_views": 233,
+      "avg_interactions": 1.7,
+      "avg_engagement_rate": 0.0166,
+      "avg_comments": 0,
+      "total_reach": 699
     }
   },
   "format_by_platform": {
@@ -288,7 +298,6 @@
   ],
   "dormant_platforms": {
     "Facebook": "129 posts, median organic reach = 1 (max 11). Effectively no distribution.",
-    "YouTube": "3 videos total (627 / 49 / 23 views). Channel barely used.",
     "LinkedIn": "8 posts, 16-83 impressions each, near-zero reactions.",
     "Pinterest": "Pins publishing with 0 impressions and 0 saves. Inactive."
   }

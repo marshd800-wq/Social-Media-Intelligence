@@ -20,6 +20,7 @@ ingest scripts map by position).
 | `data/raw/ig_posts_raw.txt` | `IGPO02,IGPO03,IGPO06,IGPO07,IGPO08,IGPO13,IGPO14,IGPO15,IGPO27,IGPO28,IGPO12` |
 | `data/raw/ig_reels_raw.txt` | `IGRE02,IGRE03,IGRE06,IGRE07,IGRE10,IGRE11,IGRE12,IGRE21,IGRE23,IGRE24,IGRE27,IGRE28,IGRE29` |
 | `data/raw/tiktok_raw.json`  | `TKPO02,TKPO05,TKPO03,TKPO22,TKPO07,TKPO08,TKPO09,TKPO10,TKPO11,TKPO13,TKPO15` |
+| `data/raw/youtube_raw.json` | network=youtube, connector=`all videos`: `YTVV02,YTVV17,YTVV05,YTVV06,YTVV09,YTVV11,YTVV12,YTVV08,YTVV07` (cols: date,title,url,views,likes,comments,shares,avg_view_min,watch_min) |
 
 - For the two IG files, save the raw `{"rows":[...]}` object as-is (the ingest strips to the first `{`).
 - For TikTok, wrap as `{"cols":["date","caption","url","type","views","likes","comments","shares","reach","fullwatchrate","avgwatch"],"rows":[...]}`.

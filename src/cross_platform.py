@@ -31,7 +31,9 @@ def summary(rows):
     }
 
 
-plat = {p: summary([r for r in recs if r["platform"] == p]) for p in ("Instagram", "TikTok")}
+plat = {p: summary([r for r in recs if r["platform"] == p])
+        for p in ("Instagram", "TikTok", "YouTube")
+        if any(r["platform"] == p for r in recs)}
 
 # by content type within each platform
 fmt = {}
@@ -84,7 +86,6 @@ matched.sort(key=lambda m: max(m["ig_reach"], m["tk_reach"]), reverse=True)
 # platforms pulled but not modeled (report honestly)
 dormant = {
     "Facebook": "129 posts, median organic reach = 1 (max 11). Effectively no distribution.",
-    "YouTube": "3 videos total (627 / 49 / 23 views). Channel barely used.",
     "LinkedIn": "8 posts, 16-83 impressions each, near-zero reactions.",
     "Pinterest": "Pins publishing with 0 impressions and 0 saves. Inactive.",
 }

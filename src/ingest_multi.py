@@ -78,8 +78,50 @@ def load_tiktok():
     return out
 
 
+def load_youtube():
+    path = os.path.join(RAW, "youtube_raw.json")
+    if not os.path.exists(path):
+        return []
+    data = json.load(open(path, encoding="utf-8"))
+    cols = data["cols"]
+    out = []
+    for row in data["rows"]:
+        d = dict(zip(cols, row))
+        dt = datetime.strptime(d["date"], "%Y%m%d%H%M%S")
+        title = d["title"] or ""
+        likes = int(d["likes"] or 0)
+        comments = int(d["comments"] or 0)
+        shares = int(d["shares"] or 0)
+        views = int(d["views"] or 0)
+        interactions = likes + comments + shares            # YouTube has no saves
+        theme, _ = _ig.classify_theme(title)
+        out.append({
+            "platform": "YouTube",
+            "url": d["url"],
+            "date": dt.strftime("%Y-%m-%d"),
+            "datetime": dt.strftime("%Y-%m-%d %H:%M"),
+            "year": dt.year,
+            "day_of_week": dt.strftime("%A"),
+            "hour": dt.hour,
+            "content_type": "reel",           # long-form video -> video bucket
+            "native_type": "VIDEO",
+            "theme": theme,
+            "hook": title,                    # YouTube's "hook" is the title
+            "caption": title,
+            "caption_word_count": _ig.word_count(title),
+            "hashtags": [], "hashtag_count": 0, "has_cta_comment": False,
+            "likes": likes, "comments": comments, "saved": None, "shares": shares,
+            # YouTube reports views, not reach — use views as the distribution metric
+            "reach": views, "views": views, "interactions": interactions,
+            "engagement_rate": round(interactions / views, 4) if views else None,
+            "comment_rate": round(comments / views, 4) if views else None,
+            "avg_watch_min": d.get("avg_view_min"),
+        })
+    return out
+
+
 def main():
-    recs = load_instagram() + load_tiktok()
+    recs = load_instagram() + load_tiktok() + load_youtube()
     recs.sort(key=lambda r: r["date"], reverse=True)
     json.dump(recs, open(os.path.join(PROC, "multiplatform_dataset.json"), "w"),
               indent=2, ensure_ascii=False)
