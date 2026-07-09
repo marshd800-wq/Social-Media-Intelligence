@@ -225,6 +225,13 @@ button.primary:disabled{opacity:.45;cursor:not-allowed}
 .recs{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
 .recs li{font-size:12px;color:var(--ink-2);padding-left:18px;position:relative}
 .recs li:before{content:"";position:absolute;left:2px;top:6px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.bdiv{height:1px;background:var(--line);margin:18px 0 14px}
+.gsub{font-size:12px;font-weight:700;color:var(--ink-2);margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.gsub .mini{font-weight:500}
+.flags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.wbanner{font-size:12px;font-weight:600;line-height:1.42;padding:10px 12px;border-radius:10px;margin-bottom:12px;background:var(--inset);color:var(--ink-2)}
+.wbanner.warn{background:var(--warn-soft);color:var(--warn)}
+.wbanner.crit{background:var(--crit-soft);color:var(--crit)}
 .callout{border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.55}
 .callout.good{background:var(--good-soft);border:1px solid color-mix(in srgb,var(--good) 25%,transparent)}
 .callout.crit{background:var(--crit-soft);border:1px solid color-mix(in srgb,var(--crit) 25%,transparent)}
@@ -423,6 +430,95 @@ function scoreContent(hook,caption,type,platform){
   return{score,tier,cls,theme,type,platform,bd,recs};
 }
 
+/* ===================== GATE 2 — BRAND ALIGNMENT SCORE =====================
+   Built from the locked July 8 2026 Brand Foundation. Five dimensions, 0-20
+   each (max 100), plus deterministic hard-rule flags. Transparent heuristics,
+   same spirit as the performance model in src/score.py. Estimates you can
+   override; the hard-rule flags are absolute. */
+const BANNED=["delve","unlock","seamlessly","game-changer","game changer","transformative","cutting-edge","cutting edge","groundbreaking","revolutionary","empower","journey","ecosystem","robust","holistic","synergy","elevate","curate","curated","innovative","dynamic","navigate","landscape"];
+const FH_RISK=/\b(perfect for families|family[- ]friendly|great for kids|safe neighborhood|christian|church|no kids|singles?|couples?|retirees|mature|empty[- ]nester|bachelor|ideal for a family|family home)\b/i;
+function _cm(low,words){let n=0,hits=[];for(const w of words)if(low.includes(w)){n++;hits.push(w);}return[n,hits];}
+function brandScore(hook,caption){
+  hook=hook||'';caption=caption||'';
+  const raw=hook+'\n'+caption;const t=raw.toLowerCase();
+  const dims=[];
+
+  // 1) VOICE MATCH — first-person Diana; hard deductions for third-person / generic-agent
+  let v1=6;const n1=[];
+  const fp=(t.match(/\b(i|i'm|im|i've|i'll|i'd|my|me|mine)\b/g)||[]).length;
+  const tpSelf=/\b(diana (is|will|can|helps|marsh)|she'll help|dianatheatlrealtor|your (trusted )?realtor|our team (is|will)|we (are|will) (here|happy) to help)\b/i.test(raw);
+  const broadcast=/\b(contact (me|us) today|call the experts|reach out today|let us help you|book (your|a) (consult|appointment) today)\b/i.test(raw);
+  if(fp>=1){v1+=6;n1.push('first-person voice');}
+  if(fp>=3)v1+=2;
+  if(/\byou(r)?\b/i.test(raw)){v1+=2;n1.push('speaks to the reader');}
+  if(tpSelf){v1-=8;n1.push('third-person / generic-agent voice (hard deduction)');}
+  if(broadcast){v1-=5;n1.push('brand-broadcast phrasing');}
+  if(fp===0&&!tpSelf){v1-=3;n1.push('no clear first-person voice');}
+  v1=Math.max(0,Math.min(20,v1));dims.push(['Voice match',v1,20,n1.join(', ')||'neutral']);
+
+  // 2) POWER ADJECTIVES — Warm + Limitless + Intentional (~0-7 each)
+  const wn=_cm(t,["love","grateful","heart","family","welcome","hey","care","proud","celebrat","congrat","cup","cozy","warm","kind","joy","thankful"])[0];
+  const ln=_cm(t,["possib","what's possible","no limit","anywhere","grow","expand","open door","more","next","options","room to","future","dream","potential","ready"])[0];
+  const inn=_cm(t,["strateg","plan","system","on purpose","deliberate","step","framework","checklist","here's how","process","thoughtful","by design","specific","prepared","intentional","playbook","map"])[0];
+  const sub=x=>x<=0?0:x===1?3:x===2?5:7;const warm=sub(wn),lim=sub(ln),intent=sub(inn);
+  const v2=Math.min(20,warm+lim+intent);
+  dims.push(['Power adjectives',v2,20,'Warm '+warm+', Limitless '+lim+', Intentional '+intent+' (of 7 each)']);
+
+  // 3) SUPERPOWER + AND — REALTOR AND Strategist (bonus) OR Real Estate AND Experiences
+  const sn=_cm(t,["strateg","marketing","system","data","numbers","comps","pricing","price","negotiat","plan","framework","process","funnel","position","market breakdown","how i","playbook","leverage","timeline","prep","checklist","roi","equity","math","stats","rates"])[0];
+  const en=_cm(t,["food","restaurant","coffee","art","museum","travel","neighborhood","local","hidden gem","aviary","walk","park","event","culture","eat","dinner","chef","gallery","community","shop","brunch","patio","mural"])[0];
+  let v3,n3;
+  if(sn>0){v3=Math.min(20,14+Math.min(6,(sn-1)*2));n3='Strategist edge (REALTOR® and strategist), the prized, hard-to-copy half';}
+  else if(en>0){v3=Math.min(16,8+Math.min(4,(en-1)*2));n3='Real estate and experiences (local eye). Solid, but the feed over-indexes this; add a strategist angle to go higher';}
+  else{v3=3;n3='No superpower shown, reads generic';}
+  dims.push(['Superpower + AND',v3,20,n3]);
+
+  // 4) KIMBERLY TEST — teaches value + speaks to a specific avatar
+  let v4=4;const n4=[];
+  const teaches=/\b(here'?s what|how to|what nobody tells you|\d+ things|before you|mistake|step|did you know|what to expect|the difference between|why (you|your|it)|guide|breakdown|explain|so you|means for you)\b/i.test(raw);
+  const avatar=/\b(first[- ]time|move[- ]up|next home|seller|equity|been in your home|10 (years|yrs)|relocat|moving to atlanta|new to atlanta|teacher|homeowner|thinking (of|about) selling)\b/i.test(raw);
+  if(teaches){v4+=8;n4.push('teaches, does not just sell');}
+  if(avatar){v4+=8;n4.push('speaks to a specific avatar');}
+  if(!teaches&&!avatar)n4.push('no clear avatar or teaching value');
+  v4=Math.max(0,Math.min(20,v4));dims.push(['Kimberly test',v4,20,n4.join(', ')]);
+
+  // 5) WARM LUXURY POSITIONING — luxury not cold, not cheap / influencer
+  let v5=12;const n5=[];
+  const emojis=(raw.match(/\p{Extended_Pictographic}/gu)||[]).length;
+  const bangs=(raw.match(/!/g)||[]).length;
+  const capsHype=/\b(OMG|WOW|HUGE|INSANE|CRAZY|ASAP|LINK IN BIO|HURRY|BLOWING UP)\b/.test(raw);
+  const qual=_cm(t,["quality","considered","refined","standard","detail","craft","thoughtful","elevated","timeless","calm","ease","luxury with a pulse"])[0];
+  if(qual>0){v5+=Math.min(5,qual*2);n5.push('quality / warmth cues');}
+  if(emojis>3){v5-=5;n5.push(emojis+' emojis (reads influencer)');}
+  if(bangs>=3){v5-=4;n5.push(bangs+' exclamation marks (reads hype)');}
+  if(capsHype){v5-=5;n5.push('all-caps hype (reads cheap)');}
+  v5=Math.max(0,Math.min(20,v5));dims.push(['Warm luxury',v5,20,n5.join(', ')||'holds a neutral standard']);
+
+  const total=dims.reduce((a,d)=>a+d[1],0);let band,cls;
+  if(total>=80){band='Sharp, priority';cls='good';}
+  else if(total>=60){band='Solid, tighten it';cls='good';}
+  else if(total>=40){band='Off-brand drift, rework';cls='warn';}
+  else{band='Any agent could post this, do not post';cls='crit';}
+
+  // ---- deterministic hard-rule flags (absolute) ----
+  const flags=[];
+  const fb=BANNED.filter(w=>w!=='leverage'&&t.includes(w));
+  flags.push(fb.length?{s:'fail',l:'Banned words',d:fb.join(', ')}:{s:'pass',l:'Banned words',d:'none'});
+  const hasEm=/[—–]/.test(raw);const hasDash=/\s-\s/.test(raw);
+  flags.push((hasEm||hasDash)?{s:'fail',l:'Dashes',d:hasEm?'em / en dash present':'spaced hyphen used as a dash'}:{s:'pass',l:'No dashes',d:'clean'});
+  const rBad=/\bREALTOR\b(?!®)/.test(raw);const fBad=/\bForever Agent\b(?!®)/.test(raw);
+  flags.push((rBad||fBad)?{s:'fail',l:'® symbol',d:((rBad?'REALTOR needs ®. ':'')+(fBad?'Forever Agent needs ®.':'')).trim()}:{s:'pass',l:'® symbol',d:'ok'});
+  flags.push(FH_RISK.test(raw)?{s:'warn',l:'Fair Housing',d:'possible protected-class language. Market the situation, not who lives there'}:{s:'pass',l:'Fair Housing',d:'clear'});
+  const hw=hook.trim().split(/\s+/).filter(Boolean).length;
+  flags.push((hw>0&&hw<=9)?{s:'pass',l:'Hook length',d:hw+' words (under 9)'}:{s:hw===0?'warn':'fail',l:'Hook length',d:hw===0?'no hook line given':hw+' words (aim under 9)'});
+  if(/\bclhms\b/i.test(raw))flags.push({s:'fail',l:'CLHMS',d:'designation not held, remove it'});
+  if(/\bdelta\b/i.test(raw)||/✈/.test(raw))flags.push({s:'fail',l:'Delta / airplane',d:'never reference in client-facing content'});
+
+  const hardFail=flags.some(f=>f.s==='fail');
+  return{total,band,cls,dims,flags,hardFail};
+}
+
+
 /* ---------- render helpers ---------- */
 function bar(label,val,max,color,dim){
   const w=Math.max(2,Math.min(100,val/max*100));
@@ -442,6 +538,8 @@ function donut(segs,center,sub){
 function fmtPill(t){return '<span class="pill '+t+'"><span class="swatch" style="background:'+FMT[t]+'"></span>'+FMTLBL[t]+'</span>';}
 function scoreColor(s){return s>=70?'var(--good)':s>=55?'var(--accent)':s>=42?'var(--warn)':'var(--crit)';}
 function scoreBg(s){return s>=70?'var(--good-soft)':s>=55?'var(--accent-soft)':s>=42?'var(--warn-soft)':'var(--crit-soft)';}
+function brandColor(s){return s>=80?'var(--good)':s>=60?'var(--accent)':s>=40?'var(--warn)':'var(--crit)';}
+function brandBg(s){return s>=80?'var(--good-soft)':s>=60?'var(--accent-soft)':s>=40?'var(--warn-soft)':'var(--crit-soft)';}
 
 /* ---------- views ---------- */
 const X=JSON.parse(document.getElementById('xdata').textContent);
@@ -757,15 +855,35 @@ function renderScore(){
   const hook=document.getElementById('hk').value;
   const cap=document.getElementById('cp').value;
   const r=scoreContent(hook,cap,type,platform);
+  const b=brandScore(hook,cap);
+  // Performance-first: performance leads, brand is the tie-breaker and the flag.
+  let banners='';
+  if(b.hardFail)banners+=`<div class="wbanner crit">Hard brand-rule fail. Fix the red flags below before posting, whatever the scores say.</div>`;
+  if(r.score>=55&&b.total<60)banners+=`<div class="wbanner warn">Performance-first call: strong reach, weak brand (${b.total}/100). Cleared on performance, flagged on brand. Posting this kind of content repeatedly builds the wrong audience.</div>`;
+  else if(b.total>=80&&r.score<42)banners+=`<div class="wbanner">On-brand but low predicted reach. Keep the voice, strengthen the flagged performance items.</div>`;
+  const dimColor=v=>v>=14?'var(--good)':v>=8?'var(--warn)':'var(--crit)';
+  const chip=f=>`<span class="pill ${f.s==='pass'?'good':f.s==='fail'?'crit':'warn'}">${f.s==='pass'?'✓ ':f.s==='fail'?'✕ ':'! '}${f.l}</span>`;
+  const badFlags=b.flags.filter(f=>f.s!=='pass');
   const sc=document.getElementById('scorecard');
   sc.innerHTML=`
+    ${banners}
+    <div class="gsub">Performance <span class="mini">predicted reach vs your history</span></div>
     <div class="gauge">
       ${donut([{v:r.score,c:scoreColor(r.score)},{v:100-r.score,c:'var(--inset)'}],r.score,'/ 100')}
       <div class="tier" style="color:${scoreColor(r.score)};background:${scoreBg(r.score)}">${r.tier}</div>
       <p class="mini" style="margin:10px 0 0">Detected theme: <b style="color:var(--ink-2)">${esc(r.theme.split(' (')[0])}</b></p>
     </div>
-    <div class="bd">${r.bd.map(b=>`<div class="l"><span class="nm">${b[0]}</span><span class="d">${esc(b[2])}</span><span class="n" style="color:${b[1]>0?'var(--good)':b[1]<0?'var(--crit)':'var(--muted)'}">${b[1]>0?'+':''}${b[1]}</span></div>`).join('')}</div>
-    ${r.recs.length?'<ul class="recs">'+r.recs.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>':''}`;
+    <div class="bd">${r.bd.map(x=>`<div class="l"><span class="nm">${x[0]}</span><span class="d">${esc(x[2])}</span><span class="n" style="color:${x[1]>0?'var(--good)':x[1]<0?'var(--crit)':'var(--muted)'}">${x[1]>0?'+':''}${x[1]}</span></div>`).join('')}</div>
+    ${r.recs.length?'<ul class="recs">'+r.recs.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>':''}
+    <div class="bdiv"></div>
+    <div class="gsub">Brand alignment <span class="mini">fit to the Brand Foundation</span></div>
+    <div class="gauge">
+      ${donut([{v:b.total,c:brandColor(b.total)},{v:100-b.total,c:'var(--inset)'}],b.total,'/ 100')}
+      <div class="tier" style="color:${brandColor(b.total)};background:${brandBg(b.total)}">${b.band}</div>
+    </div>
+    <div class="bd">${b.dims.map(d=>`<div class="l"><span class="nm">${d[0]}</span><span class="d">${esc(d[3])}</span><span class="n" style="color:${dimColor(d[1])}">${d[1]}/${d[2]}</span></div>`).join('')}</div>
+    <div class="flags">${b.flags.map(chip).join('')}</div>
+    ${badFlags.length?'<ul class="recs">'+badFlags.map(f=>`<li><b>${f.l}:</b> ${esc(f.d)}</li>`).join('')+'</ul>':''}`;
 }
 
 function viewPlatforms(){
