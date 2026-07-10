@@ -61,34 +61,38 @@ The **Engagement Targets**, **Content Matrix**, and **SOPs** views read live fro
 Notion via `/api/config`. Each block is independent and **degrades to the baked-in
 fallback** if its database id isn't set — so you can wire them one at a time.
 
-**Content Matrix coverage** (no new database — reuses the Content Queue):
-1. In the **Content Queue**, add two properties:
-   - `Character` — **Multi-select** (or Select) with options containing the words
-     *REALTOR*, *Entrepreneur*, *Curator* (or *Luxury*), *Atlanta* (or *Native*).
-   - `Job` — **Select** with options *Entertain*, *Educate*, *Encourage*.
-2. Tag your posts. The matrix tallies coverage from these automatically — no extra
-   env var needed (it reuses `NOTION_DATABASE_ID`). Matching is keyword-based and
-   case-insensitive, so exact option names don't matter.
+**These databases are already built and seeded for you** (under **NOVA OS**):
 
-**Engagement Targets** (small new database):
-1. New database **NOVA — Engagement Targets** with properties:
-   `Platform` (title), `Target Low` (number), `Target High` (number, optional),
-   `Notes` (text). One row per platform (TikTok, Instagram, LinkedIn, …).
-2. Connect it to the `Pulse Dashboard` integration (⋯ → Connections).
-3. Add env var **`NOTION_TARGETS_DB`** = that database's 32-char id.
+| Database | What to do | Database id (for env var) |
+|---|---|---|
+| **NOVA — Engagement Targets** | already seeded (TikTok 3–9, IG 4, LinkedIn 2) | `6c26d46e55ae49e190d7517b5364ec2c` |
+| **NOVA — SOPs** | already seeded (3 starter SOPs) | `a0912f362f344be28e7ac09e76f0fe4d` |
+| **NOVA — Content Queue** | `Character` + `Job` columns already added | reuses `NOTION_DATABASE_ID` |
 
-**SOPs** (small new database):
-1. New database **NOVA — SOPs** with properties:
-   `Name` (title), `Trigger` (text/select, optional), `Body` (text).
-2. Connect it to the `Pulse Dashboard` integration.
-3. Add env var **`NOTION_SOPS_DB`** = that database's 32-char id.
+To turn them on, two steps:
 
-Redeploy after adding env vars. The three views flip from "awaiting live data" to
-live within ~60s (responses are edge-cached 60s to stay well under Notion's rate
-limit). Analytics (reach, ER, themes) intentionally stay on the weekly Metricool
-bake — Notion only serves the small, hand-edited config you own.
+1. **Connect the `Pulse Dashboard` integration to the two new databases.** Open
+   each (**NOVA — Engagement Targets**, **NOVA — SOPs**) → **⋯ → Connections →
+   Connect to → Pulse Dashboard**. (Same integration from step 1 above. Without
+   this the API can't read them — this is the one manual click I can't do for you.)
+2. **Add two env vars in Vercel** (Production + Preview), then redeploy:
 
-| New env var | Powers | If unset |
+   | Name | Value |
+   |---|---|
+   | `NOTION_TARGETS_DB` | `6c26d46e55ae49e190d7517b5364ec2c` |
+   | `NOTION_SOPS_DB` | `a0912f362f344be28e7ac09e76f0fe4d` |
+
+**Content Matrix coverage** needs no env var — it reuses `NOTION_DATABASE_ID`.
+Just tag posts in the Content Queue: set **Character** (one or more of REALTOR®,
+Entrepreneur, Soft Luxury Experience Curator, Atlanta Native) and **Job**
+(Entertain / Educate / Encourage). The matrix tallies coverage automatically.
+
+The three views flip from "awaiting live data" to live within ~60s (responses are
+edge-cached 60s to stay well under Notion's rate limit). Analytics (reach, ER,
+themes) intentionally stay on the weekly Metricool bake — Notion only serves the
+small, hand-edited config you own.
+
+| Env var | Powers | If unset |
 |---|---|---|
 | `NOTION_TARGETS_DB` | Engagement Targets numbers | shows unverified fallback benchmarks |
 | `NOTION_SOPS_DB` | SOPs view | shows "connect the SOPs database" |
