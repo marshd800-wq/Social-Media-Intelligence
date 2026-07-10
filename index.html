@@ -284,6 +284,7 @@ button.primary:disabled{opacity:.45;cursor:not-allowed}
       <div class="navlabel">Plan</div>
       <button data-v="matrix" data-ico="matrix"><span>Content Matrix</span></button>
       <button data-v="targets" data-ico="gauge"><span>Engagement Targets</span></button>
+      <button data-v="sops" data-ico="book"><span>SOPs</span></button>
       <div class="navlabel">Act</div>
       <button data-v="score" data-ico="target"><span>Score a Draft</span></button>
     </nav>
@@ -332,6 +333,7 @@ window.ICO={
   compare:icon('<path d="M4 6h7M4 12h5M4 18h9"/><path d="M20 6h-4M20 12h-6M20 18h-3"/>'),
   matrix:icon('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>'),
   gauge:icon('<path d="M12 13 16 9"/><path d="M4 20a8 8 0 1 1 16 0"/><circle cx="12" cy="20" r="1.4"/>'),
+  book:icon('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z"/><path d="M19 17H6a2 2 0 0 0-2 2"/>'),
 };
 </script>
 <script>
@@ -958,7 +960,9 @@ function viewMatrix(){
   // strategically thin cells (brand-strategy input, NOT measured): whole
   // Entrepreneur column + the Curator × Educate intersection.
   const isThin=(ch,job)=> ch==='Entrepreneur' || (ch==='Soft Luxury Experience Curator'&&job==='Educate');
-  let thinCount=0;
+  const mlive=(window.LIVECFG&&window.LIVECFG.matrix)||null;
+  const cnt=(ch,job)=> mlive?(mlive.cells[ch+'|'+job]||0):null;
+  let thinCount=0, coveredCells=0;
   const cols='170px repeat('+chars.length+',1fr)';
   const head='<div style="font-size:11px;color:var(--muted);font-weight:600"></div>'+
     chars.map(c=>`<div style="padding:8px 10px"><b style="font-size:12.5px">${esc(c.n)}</b><div class="mini" style="margin-top:2px">${esc(c.d)}</div></div>`).join('');
@@ -966,15 +970,20 @@ function viewMatrix(){
     const rowhead=`<div style="align-self:center;padding:8px 10px"><b style="font-size:12.5px">${j.n}</b><div class="mini" style="margin-top:2px">${esc(j.d)}</div></div>`;
     const cells=chars.map(c=>{
       const thin=isThin(c.n,j.n); if(thin)thinCount++;
+      const n=cnt(c.n,j.n); if(n>0)coveredCells++;
       const bg=thin?'var(--crit-soft)':'var(--panel)';
       const bd=thin?'1px solid color-mix(in srgb,var(--crit) 32%,transparent)':'1px solid var(--line)';
       const tag=thin?`<span class="pill crit" style="font-size:9.5px;padding:2px 7px">THIN — fill</span>`
-                    :`<span class="mini" style="opacity:.75">covered</span>`;
+                    :`<span class="mini" style="opacity:.75">${mlive?'covered':'—'}</span>`;
+      const bottom=mlive
+        ? (n>0?`<div class="mini" style="color:var(--ink-2)"><b>${n}</b> post${n===1?'':'s'} tagged</div>`
+              :`<div class="mini" style="color:var(--crit)">0 tagged — gap</div>`)
+        : `<div class="mini" style="color:var(--muted)">— untagged · awaiting live data</div>`;
       return `<div style="background:${bg};border:${bd};border-radius:10px;padding:11px 11px;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;gap:8px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
           <span class="mini" style="font-weight:600;color:var(--ink-2)">${j.n.slice(0,3)} · ${esc(c.n.split(' ')[0])}</span>${tag}
         </div>
-        <div class="mini" style="color:var(--muted)">— untagged · awaiting live data</div>
+        ${bottom}
       </div>`;
     }).join('');
     return `<div style="display:grid;grid-template-columns:${cols};gap:10px;margin-top:10px">${rowhead}${cells}</div>`;
@@ -983,15 +992,15 @@ function viewMatrix(){
   <div class="grid g4">
     <div class="card stat"><div class="tilehead"><div><div class="lab">Matrix cells</div><div class="big">${chars.length*jobs.length}</div></div><div class="tile-ico">${ICO.matrix}</div></div><div class="meta">${chars.length} characters × ${jobs.length} jobs</div></div>
     <div class="card stat"><div class="tilehead"><div><div class="lab">Strategically thin</div><div class="big" style="color:var(--crit)">${thinCount}</div></div><div class="tile-ico">${ICO.spark}</div></div><div class="meta">under-served by design — prioritize these</div></div>
-    <div class="card stat"><div class="tilehead"><div><div class="lab">Tagged posts</div><div class="big">—</div></div><div class="tile-ico">${ICO.tag}</div></div><div class="meta">awaiting live data (matrix tags)</div></div>
-    <div class="card stat"><div class="tilehead"><div><div class="lab">Coverage</div><div class="big">—</div></div><div class="tile-ico">${ICO.grid}</div></div><div class="meta">activates once posts are tagged</div></div>
+    <div class="card stat"><div class="tilehead"><div><div class="lab">Tagged posts</div><div class="big">${mlive?mlive.tagged:'—'}</div></div><div class="tile-ico">${ICO.tag}</div></div><div class="meta">${mlive?'tagged in NOVA Content Queue':'awaiting live data (matrix tags)'}</div></div>
+    <div class="card stat"><div class="tilehead"><div><div class="lab">Coverage</div><div class="big">${mlive?coveredCells+'/'+(chars.length*jobs.length):'—'}</div></div><div class="tile-ico">${ICO.grid}</div></div><div class="meta">${mlive?'cells with at least one post':'activates once posts are tagged'}</div></div>
   </div>
 
   <div class="card" style="margin-top:16px">
     <p class="eyebrow">Character × Job coverage grid</p>
     <div style="display:grid;grid-template-columns:${cols};gap:10px;align-items:end;padding-bottom:2px;border-bottom:1px solid var(--line)">${head}</div>
     ${rows}
-    <div class="callout crit" style="margin-top:16px"><b>Thin cells</b> are a deliberate brand-strategy gap, not a measured stat: the entire <b>Entrepreneur</b> column and <b>Curator × Educate</b> are flagged to fill. Per-cell post counts show <b>"awaiting live data"</b> until posts are tagged to the matrix — no fabricated coverage numbers here.</div>
+    <div class="callout crit" style="margin-top:16px"><b>Thin cells</b> are a deliberate brand-strategy gap, not a measured stat: the entire <b>Entrepreneur</b> column and <b>Curator × Educate</b> are flagged to fill. ${mlive?'Per-cell counts are tallied live from Character + Job tags on the NOVA Content Queue.':'Per-cell post counts show <b>"awaiting live data"</b> until posts are tagged in NOVA — no fabricated coverage numbers here.'}</div>
   </div>`;
 }
 
@@ -1003,11 +1012,12 @@ function viewMatrix(){
 function viewTargets(){
   const snap=(X.summary||{});
   const pct=v=>(v==null?null:+(v*100).toFixed(1));
-  const rows=[
-    {p:'TikTok',   lo:3,hi:9, ref:pct(snap.TikTok&&snap.TikTok.avg_engagement_rate)},
-    {p:'Instagram',lo:4,hi:4, ref:pct(snap.Instagram&&snap.Instagram.avg_engagement_rate)},
-    {p:'LinkedIn', lo:2,hi:2, ref:null},
+  const live=(window.LIVECFG&&window.LIVECFG.targets)||null;
+  const FALL=[
+    {p:'TikTok',lo:3,hi:9},{p:'Instagram',lo:4,hi:4},{p:'LinkedIn',lo:2,hi:2},
   ];
+  const src=live?live.map(t=>({p:t.platform,lo:t.lo,hi:(t.hi==null?t.lo:t.hi)})):FALL;
+  const rows=src.map(t=>({...t,ref:pct(snap[t.p]&&snap[t.p].avg_engagement_rate)}));
   const cards=rows.map(r=>{
     const tgt=r.lo===r.hi?r.lo+'%':r.lo+'–'+r.hi+'%';
     const refline=r.ref!=null
@@ -1026,13 +1036,35 @@ function viewTargets(){
       ${refline}
     </div>`;
   }).join('');
+  const banner=live
+    ? `<div class="callout good" style="margin-bottom:16px"><b>Targets sourced live from NOVA (Notion).</b> These are your own benchmarks, edited in the Engagement Targets database — this dashboard reads them, it does not invent them. Live progress bars stay empty ("awaiting live data") until a real-time engagement feed is connected; the gray reference is the last weekly Metricool snapshot.</div>`
+    : `<div class="callout crit" style="margin-bottom:16px"><b>These targets are working benchmarks — unverified, not industry fact.</b> They're placeholders to align against, not validated standards, and NOVA isn't wired to this view yet (showing fallback values). Live progress bars stay empty ("awaiting live data") until a real-time analytics feed is connected.</div>`;
   return `
-  <div class="callout crit" style="margin-bottom:16px"><b>These targets are working benchmarks — unverified, not industry fact.</b> They're placeholders to align against, not validated standards. Live progress bars stay empty ("awaiting live data") until a real-time analytics feed is connected. Confirm or replace the numbers before treating them as goals.</div>
+  ${banner}
   <div class="grid g3">${cards}</div>
   <div class="card" style="margin-top:16px">
     <p class="eyebrow">How these read</p>
     <p class="lead"><b>Target</b> is the engagement-rate benchmark to aim for on each platform. <b>Live progress</b> is intentionally blank — this view does not yet read a live analytics feed, so it will not invent a number. Where a real <b>Metricool weekly snapshot</b> exists it's shown in gray as a reference point only, clearly not live tracking. Wiring a real-time source (Phase 2) is what turns these bars on.</p>
   </div>`;
+}
+
+/* ===================== SOPs (read-only, live from NOVA) ===================== */
+function viewSops(){
+  const sops=(window.LIVECFG&&window.LIVECFG.sops)||null;
+  if(!sops||!sops.length){
+    return `<div class="card">
+      <p class="eyebrow">Standard operating procedures</p>
+      <p class="lead">This view reads your <b>SOPs</b> straight from NOVA (Notion) so the playbook lives in one place. It's <b>awaiting live data</b> — connect the SOPs database (set <code>NOTION_SOPS_DB</code> in Vercel; steps in SETUP_LIVE.md) and your procedures appear here automatically. Nothing is invented in the meantime.</p>
+    </div>`;
+  }
+  const cards=sops.map(s=>`<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px">
+      <b style="font-size:14px">${esc(s.title)}</b>${s.trigger?`<span class="pill warn" style="font-size:10px">${esc(s.trigger)}</span>`:''}
+    </div>
+    ${s.body?`<p class="lead" style="white-space:pre-wrap">${esc(s.body)}</p>`:'<p class="mini">No body text.</p>'}
+  </div>`).join('');
+  return `<div class="callout good" style="margin-bottom:16px"><b>Live from NOVA (Notion).</b> ${sops.length} SOP${sops.length===1?'':'s'} — read-only. Edit in Notion; this view reflects it within ~60s.</div>
+    <div class="grid" style="gap:14px">${cards}</div>`;
 }
 
 /* ---------- app wiring ---------- */
@@ -1045,6 +1077,7 @@ const VIEWS={overview:['Overview',"What's working across 133 posts",viewOverview
   platforms:['Platforms','Instagram vs TikTok — and where the rest stand',viewPlatforms],
   matrix:['Content Matrix','4 characters × 3 jobs — where coverage is thin',viewMatrix],
   targets:['Engagement Targets','Benchmarks to aim for — live tracking pending',viewTargets],
+  sops:['SOPs','Your playbook — live from NOVA',viewSops],
   score:['Score a Draft','Predict performance before you produce',viewScore]};
 const wrap=document.getElementById('wrap');
 function show(v){
@@ -1094,6 +1127,17 @@ tgl.addEventListener('click',()=>{const n=curTheme()==='dark'?'light':'dark';
 document.documentElement.setAttribute('data-theme', readSaved()||'light');   // light by default
 setTgl();
 show('overview');
+
+/* Phase 2 — pull live config (targets / matrix / SOPs) from NOVA. Falls back
+   silently to baked-in values if /api/config isn't configured or is offline.
+   Re-renders only the live views if one is open when the data arrives. */
+window.LIVECFG=null;
+fetch('/api/config',{cache:'no-store'}).then(r=>r.json()).then(j=>{
+  if(!j||!j.configured)return;
+  window.LIVECFG=j;
+  const cur=document.querySelector('#nav button.on');
+  if(cur&&['targets','matrix','sops'].includes(cur.dataset.v))show(cur.dataset.v);
+}).catch(()=>{});
 </script>
 
 <!-- Pulse dashboard · deployed on Vercel -->

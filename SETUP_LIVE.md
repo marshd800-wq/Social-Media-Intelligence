@@ -52,3 +52,44 @@ using a Metricool API token + the media URL.
 ### Security
 Tokens live only in Vercel env vars (server-side). They are never sent to the
 browser and never committed to git. The `/api/*` functions read them at runtime.
+
+---
+
+## 5. (Phase 2) Make NOVA the source of truth for Targets / Matrix / SOPs
+
+The **Engagement Targets**, **Content Matrix**, and **SOPs** views read live from
+Notion via `/api/config`. Each block is independent and **degrades to the baked-in
+fallback** if its database id isn't set — so you can wire them one at a time.
+
+**Content Matrix coverage** (no new database — reuses the Content Queue):
+1. In the **Content Queue**, add two properties:
+   - `Character` — **Multi-select** (or Select) with options containing the words
+     *REALTOR*, *Entrepreneur*, *Curator* (or *Luxury*), *Atlanta* (or *Native*).
+   - `Job` — **Select** with options *Entertain*, *Educate*, *Encourage*.
+2. Tag your posts. The matrix tallies coverage from these automatically — no extra
+   env var needed (it reuses `NOTION_DATABASE_ID`). Matching is keyword-based and
+   case-insensitive, so exact option names don't matter.
+
+**Engagement Targets** (small new database):
+1. New database **NOVA — Engagement Targets** with properties:
+   `Platform` (title), `Target Low` (number), `Target High` (number, optional),
+   `Notes` (text). One row per platform (TikTok, Instagram, LinkedIn, …).
+2. Connect it to the `Pulse Dashboard` integration (⋯ → Connections).
+3. Add env var **`NOTION_TARGETS_DB`** = that database's 32-char id.
+
+**SOPs** (small new database):
+1. New database **NOVA — SOPs** with properties:
+   `Name` (title), `Trigger` (text/select, optional), `Body` (text).
+2. Connect it to the `Pulse Dashboard` integration.
+3. Add env var **`NOTION_SOPS_DB`** = that database's 32-char id.
+
+Redeploy after adding env vars. The three views flip from "awaiting live data" to
+live within ~60s (responses are edge-cached 60s to stay well under Notion's rate
+limit). Analytics (reach, ER, themes) intentionally stay on the weekly Metricool
+bake — Notion only serves the small, hand-edited config you own.
+
+| New env var | Powers | If unset |
+|---|---|---|
+| `NOTION_TARGETS_DB` | Engagement Targets numbers | shows unverified fallback benchmarks |
+| `NOTION_SOPS_DB` | SOPs view | shows "connect the SOPs database" |
+| (reuses `NOTION_DATABASE_ID`) | Matrix coverage counts | cells show "awaiting live data" |
