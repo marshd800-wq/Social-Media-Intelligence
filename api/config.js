@@ -87,19 +87,36 @@ async function queryAll(token, dbId) {
   return out;
 }
 
+// Detect a P.E.S. mix row. These live in the same Targets table but are not
+// per-platform benchmarks — they carry the editable Personal/Educational/Social
+// Proof target percentages the Content Matrix bar reads.
+function pesKey(name) {
+  const t = (name || "").toLowerCase();
+  if (!t.includes("p.e.s") && !/\bpes\b/.test(t)) return null;
+  if (t.includes("personal")) return "Personal";
+  if (t.includes("educat")) return "Educational";
+  if (t.includes("social") || t.includes("proof") || t.includes("sales")) return "Sales";
+  return null;
+}
+
 async function loadTargets(token, dbId) {
   if (!dbId) return null;
   const pages = await queryAll(token, dbId);
   const rows = [];
+  const pes = {};
   for (const p of pages) {
     const pr = p.properties || {};
     const platform = text(pr.Platform || pr.Name) || sel(pr.Platform);
     if (!platform) continue;
     const lo = num(pr["Target Low"]) ?? num(pr.Target) ?? num(pr["Target %"]);
     const hi = num(pr["Target High"]) ?? lo;
+    // Route P.E.S. mix rows into a keyed object; keep everything else as a
+    // per-platform benchmark row.
+    const pk = pesKey(platform);
+    if (pk) { if (lo != null) pes[pk] = lo; continue; }
     rows.push({ platform, lo, hi: hi ?? lo, note: text(pr.Notes) });
   }
-  return rows.length ? rows : null;
+  return { rows: rows.length ? rows : null, pes: Object.keys(pes).length ? pes : null };
 }
 
 async function loadMatrix(token, dbId) {
@@ -142,7 +159,7 @@ export default async function handler(req, res) {
   const token = process.env.NOTION_TOKEN;
   if (!token) return res.status(200).json({ configured: false });
   try {
-    const [targets, matrix, sops] = await Promise.all([
+    const [targetsRes, matrix, sops] = await Promise.all([
       loadTargets(token, process.env.NOTION_TARGETS_DB).catch(() => null),
       loadMatrix(token, process.env.NOTION_DATABASE_ID).catch(() => null),
       loadSops(token, process.env.NOTION_SOPS_DB).catch(() => null),
@@ -152,7 +169,9 @@ export default async function handler(req, res) {
       configured: true,
       characters: CHARACTERS,
       jobs: JOBS,
-      targets, matrix, sops,
+      targets: targetsRes ? targetsRes.rows : null,
+      pes: targetsRes ? targetsRes.pes : null,
+      matrix, sops,
     });
   } catch (e) {
     return res.status(500).json({ configured: true, error: String(e.message || e) });

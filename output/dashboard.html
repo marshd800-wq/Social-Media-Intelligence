@@ -1024,8 +1024,9 @@ function mxShowCell(ch,jb){
 }
 
 /* ---- P.E.S. mix (Personal / Educational / Sales balance, from Category) ---- */
-const PES_TARGET={Personal:34,Educational:33,Sales:33};
+let PES_TARGET={Personal:40,Educational:40,Sales:20};
 const PESCOL={Personal:'var(--carousel)',Educational:'var(--good)',Sales:'var(--warn)'};
+const PESLABEL={Personal:'Personal',Educational:'Educational',Sales:'Social Proof'};
 function pesBucket(cat){const t=(cat||'').trim().toLowerCase();
   if(t.charAt(0)==='p')return 'Personal';
   if(t.charAt(0)==='e')return 'Educational';
@@ -1039,14 +1040,14 @@ function mxPESHTML(){
   if(!live||!total){
     return `<p class="eyebrow" style="margin:0">P.E.S. mix</p><p class="cap" style="margin-top:8px">Balance of Personal / Educational / Sales across your queue. <b>Awaiting live data</b> — set a Category on items in NOVA and this fills in.</p>`;
   }
-  const seg=order.map(k=>`<div title="${k}: ${c[k]}" style="width:${c[k]/total*100}%;background:${PESCOL[k]}"></div>`).join('');
+  const seg=order.map(k=>`<div title="${PESLABEL[k]}: ${c[k]}" style="width:${c[k]/total*100}%;background:${PESCOL[k]}"></div>`).join('');
   const legend=order.map(k=>{const p=Math.round(c[k]/total*100),gap=p-PES_TARGET[k];
     const g=gap>=0?'+'+gap:''+gap,gc=Math.abs(gap)<=5?'var(--muted)':gap<0?'var(--crit)':'var(--ink-2)';
-    return `<div class="peslg"><span class="pesdot" style="background:${PESCOL[k]}"></span><b>${k}</b> <span class="mini">${c[k]} · ${p}%</span> <span class="mini" style="color:${gc}">target ${PES_TARGET[k]}% (${g})</span></div>`;}).join('');
+    return `<div class="peslg"><span class="pesdot" style="background:${PESCOL[k]}"></span><b>${PESLABEL[k]}</b> <span class="mini">${c[k]} · ${p}%</span> <span class="mini" style="color:${gc}">target ${PES_TARGET[k]}% (${g})</span></div>`;}).join('');
   return `<p class="eyebrow" style="margin:0">P.E.S. mix &nbsp;<span class="mini">${total} categorized${untagged?' · '+untagged+' untagged':''}</span></p>
     <div class="pesbar">${seg}</div>
     <div class="peslgs">${legend}</div>
-    <p class="mini" style="margin:10px 0 0">Working target is ~1/3 each (Mon personal, Wed educational, Fri sales). Shuffle a post's Category in the queue to rebalance; this updates live. Red gap = under target.</p>`;
+    <p class="mini" style="margin:10px 0 0">Strategy target: 40% Personal / 40% Educational / 20% Social Proof (Educational Mon, Personal Wed, Social Proof Fri per your P.E.S. SOP). Shuffle a post's Category in the queue to rebalance; this updates live. Red gap = under target.</p>`;
 }
 
 async function loadMatrix(){
@@ -1218,8 +1219,9 @@ window.LIVECFG=null;
 fetch('/api/config',{cache:'no-store'}).then(r=>r.json()).then(j=>{
   if(!j||!j.configured)return;
   window.LIVECFG=j;
+  if(j.pes)PES_TARGET=Object.assign({Personal:40,Educational:40,Sales:20},j.pes);
   const cur=document.querySelector('#nav button.on');
-  if(cur&&['targets','sops'].includes(cur.dataset.v))show(cur.dataset.v);
+  if(cur&&['targets','sops','matrix'].includes(cur.dataset.v))show(cur.dataset.v);
 }).catch(()=>{});
 </script>
 
