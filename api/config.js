@@ -18,7 +18,8 @@
 // If NOTION_TOKEN is missing, responds 200 {configured:false} so the frontend
 // silently keeps its fallback. Cached ~60s at the edge (Notion rate limit safe).
 
-const NOTION_VERSION = "2022-06-28";
+const V_CLASSIC = "2022-06-28";   // /v1/databases/{database_id}/query
+const V_DATASRC = "2025-09-03";   // /v1/data_sources/{data_source_id}/query
 
 // Canonical labels — MUST match the dashboard's viewMatrix()/viewTargets().
 const CHARACTERS = ["REALTOR®", "Entrepreneur", "Soft Luxury Experience Curator", "Atlanta Native"];
@@ -50,41 +51,40 @@ function canonJob(s) {
   return null;
 }
 
+function q(url, token, version, body) {
+  return fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Notion-Version": version, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 async function queryAll(token, dbId) {
-  // Try the newer data-sources endpoint first, then fall back to databases.
-  // Paginates through every page.
-  const urls = [
-    `https://api.notion.com/v1/data_sources/${dbId}/query`,
-    `https://api.notion.com/v1/databases/${dbId}/query`,
+  // Accept either a classic database id or a data-source id. Try the classic
+  // endpoint first, then the data-sources endpoint, each with its own required
+  // API version, falling through on ANY error so an id/version mismatch on one
+  // path still lets the other succeed. Then paginate the winning endpoint.
+  const attempts = [
+    { url: `https://api.notion.com/v1/databases/${dbId}/query`, version: V_CLASSIC },
+    { url: `https://api.notion.com/v1/data_sources/${dbId}/query`, version: V_DATASRC },
   ];
-  let lastErr;
-  for (const url of urls) {
-    const out = [];
-    let cursor;
-    try {
-      do {
-        const r = await fetch(url, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Notion-Version": NOTION_VERSION,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(cursor ? { page_size: 100, start_cursor: cursor } : { page_size: 100 }),
-        });
-        if (!r.ok) {
-          if (r.status === 404) { lastErr = new Error("404"); out.length = 0; break; }
-          throw new Error(`Notion ${r.status}: ${await r.text()}`);
-        }
-        const j = await r.json();
-        out.push(...(j.results || []));
-        cursor = j.has_more ? j.next_cursor : null;
-      } while (cursor);
-      if (out.length || lastErr === undefined) return out; // success (even if empty) unless it was a 404
-    } catch (e) { lastErr = e; }
+  let chosen = null, lastErr = "";
+  for (const a of attempts) {
+    const r = await q(a.url, token, a.version, { page_size: 100 });
+    if (r.ok) { chosen = { ...a, first: await r.json() }; break; }
+    lastErr = `${r.status} ${await r.text()}`;
   }
-  if (lastErr && String(lastErr.message) !== "404") throw lastErr;
-  return [];
+  if (!chosen) throw new Error(`Notion query failed. Last: ${lastErr}`);
+  const out = [...(chosen.first.results || [])];
+  let cursor = chosen.first.has_more ? chosen.first.next_cursor : null;
+  while (cursor) {
+    const r = await q(chosen.url, token, chosen.version, { page_size: 100, start_cursor: cursor });
+    if (!r.ok) break;
+    const j = await r.json();
+    out.push(...(j.results || []));
+    cursor = j.has_more ? j.next_cursor : null;
+  }
+  return out;
 }
 
 async function loadTargets(token, dbId) {

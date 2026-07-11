@@ -11,7 +11,8 @@
 // If the env vars are missing, responds 200 {configured:false} so the frontend
 // silently falls back to the baked-in snapshot.
 
-const NOTION_VERSION = "2022-06-28";
+const V_CLASSIC = "2022-06-28";   // /v1/databases/{database_id}/query
+const V_DATASRC = "2025-09-03";   // /v1/data_sources/{data_source_id}/query
 // All planning stages, idea through scheduled. Score a Draft filters to active
 // drafts with a caption; the Content Matrix uses every row.
 const ACTIVE = ["Idea", "Draft", "Pending Review", "Needs Revision", "Approved", "Scheduled"];
@@ -41,25 +42,35 @@ function flattenDraftCaption(base, hook, caption) {
   return out.map((v) => ({ ...base, ...v }));
 }
 
+function q(url, token, version, body) {
+  return fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Notion-Version": version, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 async function queryNotion(token, dbId) {
   const filter = { or: ACTIVE.map((s) => ({ property: "Status", select: { equals: s } })) };
-  const headers = { Authorization: `Bearer ${token}`, "Notion-Version": NOTION_VERSION, "Content-Type": "application/json" };
-  const endpoints = [
-    `https://api.notion.com/v1/data_sources/${dbId}/query`,
-    `https://api.notion.com/v1/databases/${dbId}/query`,
+  // Accept either a classic database id or a data-source id. Try the classic
+  // endpoint first, then the data-sources endpoint, each with its own required
+  // API version. Fall through on ANY error (not just 404) so a version/id
+  // mismatch on one path still lets the other succeed.
+  const attempts = [
+    { url: `https://api.notion.com/v1/databases/${dbId}/query`, version: V_CLASSIC },
+    { url: `https://api.notion.com/v1/data_sources/${dbId}/query`, version: V_DATASRC },
   ];
-  // Find a working endpoint, then page through all results.
-  let base = null;
-  for (const url of endpoints) {
-    const r = await fetch(url, { method: "POST", headers, body: JSON.stringify({ filter, page_size: 100 }) });
-    if (r.ok) { base = { url, first: await r.json() }; break; }
-    if (r.status !== 404) throw new Error(`Notion ${r.status}: ${await r.text()}`);
+  let chosen = null, lastErr = "";
+  for (const a of attempts) {
+    const r = await q(a.url, token, a.version, { filter, page_size: 100 });
+    if (r.ok) { chosen = { ...a, first: await r.json() }; break; }
+    lastErr = `${r.status} ${await r.text()}`;
   }
-  if (!base) throw new Error("Notion query failed on both data_sources and databases endpoints");
-  let results = base.first.results || [];
-  let cursor = base.first.has_more ? base.first.next_cursor : null;
+  if (!chosen) throw new Error(`Notion query failed. Last: ${lastErr}`);
+  let results = chosen.first.results || [];
+  let cursor = chosen.first.has_more ? chosen.first.next_cursor : null;
   while (cursor) {
-    const r = await fetch(base.url, { method: "POST", headers, body: JSON.stringify({ filter, page_size: 100, start_cursor: cursor }) });
+    const r = await q(chosen.url, token, chosen.version, { filter, page_size: 100, start_cursor: cursor });
     if (!r.ok) break;
     const j = await r.json();
     results = results.concat(j.results || []);
