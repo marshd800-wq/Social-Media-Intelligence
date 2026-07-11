@@ -232,6 +232,21 @@ button.primary:disabled{opacity:.45;cursor:not-allowed}
 .wbanner{font-size:12px;font-weight:600;line-height:1.42;padding:10px 12px;border-radius:10px;margin-bottom:12px;background:var(--inset);color:var(--ink-2)}
 .wbanner.warn{background:var(--warn-soft);color:var(--warn)}
 .wbanner.crit{background:var(--crit-soft);color:var(--crit)}
+.mx{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.mxrow{display:grid;grid-template-columns:120px repeat(3,1fr);gap:6px;align-items:stretch}
+.mxhead div{font-size:11px;font-weight:700;color:var(--ink-2);text-align:center;padding:4px}
+.mxlbl{font-size:12px;font-weight:700;color:var(--ink-2);display:flex;align-items:center}
+.mxcell{position:relative;border:1px solid var(--line);border-radius:10px;padding:16px 0;font-size:18px;cursor:pointer;background:var(--inset);color:var(--ink);transition:transform .08s;text-align:center}
+.mxcell:hover{transform:translateY(-1px)}
+.mxcell b{font-variant-numeric:tabular-nums}
+.mxcell.starved{background:var(--crit-soft);color:var(--crit);border-color:transparent}
+.mxcell.thin{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.mxcell.ok{background:var(--good-soft);color:var(--good);border-color:transparent}
+.mxstar{position:absolute;top:5px;right:7px;font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.75}
+.mxlist{display:flex;flex-direction:column}
+.lrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:12.5px}
+.lrow .nm{color:var(--ink-2);font-weight:600}
+.lrow .d{color:var(--muted);font-size:11px;white-space:nowrap}
 .callout{border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.55}
 .callout.good{background:var(--good-soft);border:1px solid color-mix(in srgb,var(--good) 25%,transparent)}
 .callout.crit{background:var(--crit-soft);border:1px solid color-mix(in srgb,var(--crit) 25%,transparent)}
@@ -777,7 +792,8 @@ async function refreshLive(loud){
     const off=t=>/flight attendant|delta|started everywhere else/i.test(t);
     const meta=t=>/i appreciate/i.test(t)&&/(clarif|brief|flag|reaching out|i need)/i.test(t);
     const map={};
-    (j.drafts||[]).forEach(d=>{const t=(d.hook||'')+' '+(d.caption||''); if(!d.caption||meta(t))return;
+    const workable=s=>!s||['Draft','Pending Review','Needs Revision'].includes(s);
+    (j.drafts||[]).forEach(d=>{const t=(d.hook||'')+' '+(d.caption||''); if(!d.caption||meta(t)||!workable(d.status))return;
       const plat=/tiktok/i.test(d.platform||'')?'TikTok':'Instagram';
       const res=scoreContent(d.hook||d.caption.slice(0,60), d.caption, 'reel', plat);
       const key=(d.hook||d.caption).toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,40);
@@ -940,68 +956,101 @@ function viewPlatforms(){
   </div>`;
 }
 
-/* ===================== CONTENT MATRIX (cell tagging) =====================
-   4 brand characters × 3 content jobs = 12 cells. Cell counts stay "untagged"
-   until posts carry matrix tags — no fabricated coverage numbers. The "thin"
-   flags come from the locked brand strategy (a deliberate gap to fill), not
-   from measured analytics. */
-function viewMatrix(){
-  const chars=[
-    {n:'REALTOR®',d:'Licensed expert · market authority'},
-    {n:'Entrepreneur',d:'Business builder · behind-the-scenes'},
-    {n:'Soft Luxury Experience Curator',d:'Taste · warm luxury · lifestyle'},
-    {n:'Atlanta Native',d:'Neighborhoods · local · community'},
-  ];
-  const jobs=[
-    {n:'Entertain',d:'Stop the scroll — humor, POV, relatable'},
-    {n:'Educate',d:'Teach — market data, how-to, breakdowns'},
-    {n:'Encourage',d:'Inspire the next step — motivate, CTA'},
-  ];
-  // strategically thin cells (brand-strategy input, NOT measured): whole
-  // Entrepreneur column + the Curator × Educate intersection.
-  const isThin=(ch,job)=> ch==='Entrepreneur' || (ch==='Soft Luxury Experience Curator'&&job==='Educate');
-  const mlive=(window.LIVECFG&&window.LIVECFG.matrix)||null;
-  const cnt=(ch,job)=> mlive?(mlive.cells[ch+'|'+job]||0):null;
-  let thinCount=0, coveredCells=0;
-  const cols='170px repeat('+chars.length+',1fr)';
-  const head='<div style="font-size:11px;color:var(--muted);font-weight:600"></div>'+
-    chars.map(c=>`<div style="padding:8px 10px"><b style="font-size:12.5px">${esc(c.n)}</b><div class="mini" style="margin-top:2px">${esc(c.d)}</div></div>`).join('');
-  const rows=jobs.map(j=>{
-    const rowhead=`<div style="align-self:center;padding:8px 10px"><b style="font-size:12.5px">${j.n}</b><div class="mini" style="margin-top:2px">${esc(j.d)}</div></div>`;
-    const cells=chars.map(c=>{
-      const thin=isThin(c.n,j.n); if(thin)thinCount++;
-      const n=cnt(c.n,j.n); if(n>0)coveredCells++;
-      const bg=thin?'var(--crit-soft)':'var(--panel)';
-      const bd=thin?'1px solid color-mix(in srgb,var(--crit) 32%,transparent)':'1px solid var(--line)';
-      const tag=thin?`<span class="pill crit" style="font-size:9.5px;padding:2px 7px">THIN — fill</span>`
-                    :`<span class="mini" style="opacity:.75">${mlive?'covered':'—'}</span>`;
-      const bottom=mlive
-        ? (n>0?`<div class="mini" style="color:var(--ink-2)"><b>${n}</b> post${n===1?'':'s'} tagged</div>`
-              :`<div class="mini" style="color:var(--crit)">0 tagged — gap</div>`)
-        : `<div class="mini" style="color:var(--muted)">— untagged · awaiting live data</div>`;
-      return `<div style="background:${bg};border:${bd};border-radius:10px;padding:11px 11px;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;gap:8px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
-          <span class="mini" style="font-weight:600;color:var(--ink-2)">${j.n.slice(0,3)} · ${esc(c.n.split(' ')[0])}</span>${tag}
-        </div>
-        ${bottom}
-      </div>`;
-    }).join('');
-    return `<div style="display:grid;grid-template-columns:${cols};gap:10px;margin-top:10px">${rowhead}${cells}</div>`;
-  }).join('');
-  return `
-  <div class="grid g4">
-    <div class="card stat"><div class="tilehead"><div><div class="lab">Matrix cells</div><div class="big">${chars.length*jobs.length}</div></div><div class="tile-ico">${ICO.matrix}</div></div><div class="meta">${chars.length} characters × ${jobs.length} jobs</div></div>
-    <div class="card stat"><div class="tilehead"><div><div class="lab">Strategically thin</div><div class="big" style="color:var(--crit)">${thinCount}</div></div><div class="tile-ico">${ICO.spark}</div></div><div class="meta">under-served by design — prioritize these</div></div>
-    <div class="card stat"><div class="tilehead"><div><div class="lab">Tagged posts</div><div class="big">${mlive?mlive.tagged:'—'}</div></div><div class="tile-ico">${ICO.tag}</div></div><div class="meta">${mlive?'tagged in NOVA Content Queue':'awaiting live data (matrix tags)'}</div></div>
-    <div class="card stat"><div class="tilehead"><div><div class="lab">Coverage</div><div class="big">${mlive?coveredCells+'/'+(chars.length*jobs.length):'—'}</div></div><div class="tile-ico">${ICO.grid}</div></div><div class="meta">${mlive?'cells with at least one post':'activates once posts are tagged'}</div></div>
-  </div>
+/* ===================== CONTENT MATRIX (live from NOVA) =====================
+   4 brand characters × 3 content jobs. Cells are tallied LIVE from Character +
+   Job tags on the NOVA Content Queue (via /api/drafts) and drill down to the
+   actual ideas. Until posts are tagged, cells read "—" — no fabricated
+   coverage. "Thin"/focus flags come from the locked brand strategy (a
+   deliberate gap: the Entrepreneur column + Curator × Educate), not analytics. */
+const MXCHARS=['REALTOR®','Entrepreneur','Soft Luxury Experience Curator','Atlanta Native'];
+const MXJOBS=['Entertain','Educate','Encourage'];
+const MXSHORT={'REALTOR®':'REALTOR®','Entrepreneur':'Entrepreneur','Soft Luxury Experience Curator':'Curator','Atlanta Native':'Native'};
+const MXTHIN=(ch,job)=> ch==='Entrepreneur' || (ch==='Soft Luxury Experience Curator'&&job==='Educate');
+window.MX={loaded:false,configured:false,items:[],series:''};
 
+function mxCanonChars(names){const out=[];(names||[]).forEach(s=>{const t=(s||'').toLowerCase();let c=null;
+  if(t.includes('realtor'))c='REALTOR®';
+  else if(t.includes('entrepreneur'))c='Entrepreneur';
+  else if(t.includes('curator')||t.includes('luxury')||t.includes('experience'))c='Soft Luxury Experience Curator';
+  else if(t.includes('atlanta')||t.includes('native')||t.includes('local'))c='Atlanta Native';
+  if(c&&out.indexOf(c)<0)out.push(c);});return out;}
+function mxCanonJob(s){const t=(s||'').toLowerCase();
+  if(t.includes('entertain'))return 'Entertain';
+  if(t.includes('educat'))return 'Educate';
+  if(t.includes('encourag'))return 'Encourage';return '';}
+function mxCellItems(ch,jb){return window.MX.items.filter(r=>{
+  const cs=mxCanonChars(r.character),j=mxCanonJob(r.job);
+  return cs.indexOf(ch)>=0&&j===jb&&(!window.MX.series||r.series===window.MX.series);});}
+
+function mxTiles(){
+  const M=window.MX, live=M.configured&&M.items.length;
+  let tagged=0; const seen=new Set();
+  if(live)M.items.forEach(r=>{const cs=mxCanonChars(r.character),j=mxCanonJob(r.job);
+    if(cs.length&&j){tagged++;cs.forEach(c=>seen.add(c+'|'+j));}});
+  return `
+    <div class="card stat"><div class="tilehead"><div><div class="lab">Matrix cells</div><div class="big">12</div></div><div class="tile-ico">${ICO.matrix}</div></div><div class="meta">4 characters × 3 jobs</div></div>
+    <div class="card stat"><div class="tilehead"><div><div class="lab">Strategically thin</div><div class="big" style="color:var(--crit)">4</div></div><div class="tile-ico">${ICO.spark}</div></div><div class="meta">under-served by design — prioritize</div></div>
+    <div class="card stat"><div class="tilehead"><div><div class="lab">Tagged items</div><div class="big">${live?tagged:'—'}</div></div><div class="tile-ico">${ICO.tag}</div></div><div class="meta">${live?'tagged in NOVA Content Queue':'awaiting live data'}</div></div>
+    <div class="card stat"><div class="tilehead"><div><div class="lab">Coverage</div><div class="big">${live?seen.size+'/12':'—'}</div></div><div class="tile-ico">${ICO.grid}</div></div><div class="meta">${live?'cells with ≥1 item':'activates once tagged'}</div></div>`;
+}
+
+function mxRenderGrid(){
+  const grid=document.getElementById('mxGrid'); if(!grid)return;
+  const M=window.MX, live=M.configured&&M.items.length;
+  let h='<div class="mxrow mxhead"><div></div>'+MXJOBS.map(j=>`<div>${j}</div>`).join('')+'</div>';
+  MXCHARS.forEach(ch=>{
+    h+=`<div class="mxrow"><div class="mxlbl">${MXSHORT[ch]}</div>`;
+    MXJOBS.forEach(jb=>{const thin=MXTHIN(ch,jb);
+      if(live){const n=mxCellItems(ch,jb).length;const cls=n===0?'starved':n<=2?'thin':'ok';
+        h+=`<button class="mxcell ${cls}" data-c="${esc(ch)}" data-j="${jb}"><b>${n}</b>${thin?'<span class="mxstar">focus</span>':''}</button>`;}
+      else{h+=`<div class="mxcell ${thin?'starved':''}" style="cursor:default"><b>—</b>${thin?'<span class="mxstar">thin</span>':''}</div>`;}
+    });
+    h+='</div>';});
+  grid.innerHTML=h;
+  if(live)grid.querySelectorAll('.mxcell').forEach(b=>b.addEventListener('click',()=>mxShowCell(b.dataset.c,b.dataset.j)));
+}
+
+function mxShowCell(ch,jb){
+  const items=mxCellItems(ch,jb),el=document.getElementById('mxDrill'); if(!el)return;
+  const chip=d=>d?`<span class="pill ${d==='Keep'?'good':/off-brand/i.test(d)?'crit':'warn'}">${esc(d)}</span>`:'';
+  el.innerHTML=`<h3>${MXSHORT[ch]} × ${jb} &nbsp;<span class="mini">${items.length} idea${items.length===1?'':'s'}</span></h3>`+
+    (items.length?'<div class="mxlist" style="margin-top:8px">'+items.map(r=>`<div class="lrow"><span class="nm">${esc(r.name||r.hook||'(untitled)')}</span><span class="d">${esc(r.status||'')}${r.series&&r.series!=='General'?' · '+esc(r.series):''}</span>${chip(r.disposition)}</div>`).join('')+'</div>'
+    :`<p class="cap" style="margin-top:8px">Empty cell — a create-fresh slot. ${MXTHIN(ch,jb)?'Strategy flags this as a priority gap to fill.':'No ideas tagged here yet.'}</p>`);
+}
+
+async function loadMatrix(){
+  let items=[],configured=false;
+  try{const r=await fetch('/api/drafts',{cache:'no-store'});const j=await r.json();
+    if(j.configured&&!j.error){configured=true;items=j.drafts||[];}}catch(e){}
+  window.MX={loaded:true,configured,items,series:''};
+  const tiles=document.getElementById('mxTiles'); if(tiles)tiles.innerHTML=mxTiles();
+  const badge=document.getElementById('mxBadge');
+  if(badge)badge.innerHTML=configured&&items.length?'<span class="pill good">live from NOVA</span>'
+    :configured?'<span class="pill warn">no tagged items yet</span>':'<span class="pill warn">connect Notion to populate</span>';
+  const ser=[...new Set(items.map(r=>r.series).filter(s=>s&&s!=='General'))].sort();
+  const sel=document.getElementById('mxSeries');
+  if(sel){ser.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+    sel.onchange=()=>{window.MX.series=sel.value;mxRenderGrid();const d=document.getElementById('mxDrill');if(d)d.innerHTML='<p class="cap">Pick a cell above to see its ideas.</p>';};}
+  mxRenderGrid();
+}
+
+function viewMatrix(){
+  return `
+  <div class="grid g4" id="mxTiles">${mxTiles()}</div>
   <div class="card" style="margin-top:16px">
-    <p class="eyebrow">Character × Job coverage grid</p>
-    <div style="display:grid;grid-template-columns:${cols};gap:10px;align-items:end;padding-bottom:2px;border-bottom:1px solid var(--line)">${head}</div>
-    ${rows}
-    <div class="callout crit" style="margin-top:16px"><b>Thin cells</b> are a deliberate brand-strategy gap, not a measured stat: the entire <b>Entrepreneur</b> column and <b>Curator × Educate</b> are flagged to fill. ${mlive?'Per-cell counts are tallied live from Character + Job tags on the NOVA Content Queue.':'Per-cell post counts show <b>"awaiting live data"</b> until posts are tagged in NOVA — no fabricated coverage numbers here.'}</div>
-  </div>`;
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px">
+      <p class="eyebrow" style="margin:0">Character × Job coverage — live from NOVA</p>
+      <span id="mxBadge"></span>
+    </div>
+    <p class="cap" style="margin:8px 0 0">Every tagged idea in your Content Queue, mapped to character × job. Red cells are starved; <b>focus</b> marks the brand-strategy priority gaps (Entrepreneur column + Curator × Educate). Click a cell to see its ideas.</p>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0 2px">
+      <label class="mini">Series / lane</label>
+      <select class="ti" id="mxSeries" style="max-width:240px;margin:0"><option value="">All series / lanes</option></select>
+    </div>
+    <div id="mxGrid" class="mx"></div>
+    <div class="callout crit" style="margin-top:16px"><b>Thin cells</b> are a deliberate brand-strategy gap, not a measured stat: the entire <b>Entrepreneur</b> column and <b>Curator × Educate</b> are flagged to fill. Counts are tallied live from Character + Job tags — until posts are tagged, cells read <b>"—"</b> and no coverage is fabricated.</div>
+  </div>
+  <div class="card" id="mxDrill" style="margin-top:16px"><p class="cap">Pick a cell above to see its ideas.</p></div>`;
 }
 
 /* ===================== ENGAGEMENT TARGETS =====================
@@ -1099,6 +1148,7 @@ function show(v){
     loadIdea(0);        // preload top idea
     refreshLive(false); // try to pull live drafts from Notion (silent if not configured)
   }
+  if(v==='matrix'){mxRenderGrid();loadMatrix();}   // live coverage from NOVA Content Queue
   document.getElementById('side').classList.remove('open');
   var _sc=document.getElementById('scrim'); if(_sc)_sc.classList.remove('on');
   window.scrollTo({top:0,behavior:'instant'in document.body.style?'instant':'auto'});
@@ -1136,7 +1186,7 @@ fetch('/api/config',{cache:'no-store'}).then(r=>r.json()).then(j=>{
   if(!j||!j.configured)return;
   window.LIVECFG=j;
   const cur=document.querySelector('#nav button.on');
-  if(cur&&['targets','matrix','sops'].includes(cur.dataset.v))show(cur.dataset.v);
+  if(cur&&['targets','sops'].includes(cur.dataset.v))show(cur.dataset.v);
 }).catch(()=>{});
 </script>
 

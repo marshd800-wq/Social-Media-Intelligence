@@ -82,10 +82,14 @@ To turn them on, two steps:
    | `NOTION_TARGETS_DB` | `6c26d46e55ae49e190d7517b5364ec2c` |
    | `NOTION_SOPS_DB` | `a0912f362f344be28e7ac09e76f0fe4d` |
 
-**Content Matrix coverage** needs no env var — it reuses `NOTION_DATABASE_ID`.
-Just tag posts in the Content Queue: set **Character** (one or more of REALTOR®,
-Entrepreneur, Soft Luxury Experience Curator, Atlanta Native) and **Job**
-(Entertain / Educate / Encourage). The matrix tallies coverage automatically.
+**Content Matrix** needs no env var — it reads the Content Queue live via
+`/api/drafts` (`NOTION_DATABASE_ID`). Tag posts with **Character** (one or more of
+REALTOR®, Entrepreneur, Soft Luxury Experience Curator, Atlanta Native) and **Job**
+(Entertain / Educate / Encourage); the matrix tallies coverage and each cell
+drills down to its ideas. Optional Queue fields enrich the drill-down (all already
+added to the Queue): **Series / Lane** (powers the filter), **Disposition**
+(Keep / Off-brand (rework) / Repurpose / Retire → color chips), **Perf Score** and
+**Brand Score** (numbers). Empty is fine — the view degrades gracefully.
 
 The three views flip from "awaiting live data" to live within ~60s (responses are
 edge-cached 60s to stay well under Notion's rate limit). Analytics (reach, ER,
