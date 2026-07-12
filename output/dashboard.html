@@ -117,6 +117,8 @@ a{color:inherit}
 .view{display:none;animation:fade .3s ease}
 .view.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tgl.spinning svg{animation:spin .8s linear infinite}
 @media (prefers-reduced-motion:reduce){.view.on{animation:none}}
 
 /* Cards + grid */
@@ -326,6 +328,8 @@ button.primary:disabled{opacity:.45;cursor:not-allowed}
       <div class="chips">
         <span class="chip"><span class="dot"></span>170 posts · IG · TikTok · YouTube</span>
         <span class="chip">Apr 2024 – Jul 2026</span>
+        <span class="chip" id="lastRefreshed">Live</span>
+        <button class="tgl" id="refreshBtn" aria-label="Refresh live content data" title="Refreshes your live content data now (queue, matrix, P.E.S., targets, SOPs). Platform stats refresh on request."></button>
         <button class="tgl" id="tgl" aria-label="Toggle theme">${ICO.sun}</button>
       </div>
     </header>
@@ -354,6 +358,7 @@ window.ICO={
   matrix:icon('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>'),
   gauge:icon('<path d="M12 13 16 9"/><path d="M4 20a8 8 0 1 1 16 0"/><circle cx="12" cy="20" r="1.4"/>'),
   book:icon('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z"/><path d="M19 17H6a2 2 0 0 0-2 2"/>'),
+  refresh:icon('<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v5h-5"/>'),
 };
 </script>
 <script>
@@ -1216,13 +1221,48 @@ show('overview');
    silently to baked-in values if /api/config isn't configured or is offline.
    Re-renders only the live views if one is open when the data arrives. */
 window.LIVECFG=null;
-fetch('/api/config',{cache:'no-store'}).then(r=>r.json()).then(j=>{
-  if(!j||!j.configured)return;
-  window.LIVECFG=j;
-  if(j.pes)PES_TARGET=Object.assign({Personal:40,Educational:40,Sales:20},j.pes);
+function loadConfig(bust){
+  const u='/api/config'+(bust?('?cb='+Date.now()):'');
+  return fetch(u,{cache:'no-store'}).then(r=>r.json()).then(j=>{
+    if(!j||!j.configured)return false;
+    window.LIVECFG=j;
+    if(j.pes)PES_TARGET=Object.assign({Personal:40,Educational:40,Sales:20},j.pes);
+    return true;
+  }).catch(()=>false);
+}
+loadConfig(false).then(ok=>{
+  if(!ok)return;
   const cur=document.querySelector('#nav button.on');
   if(cur&&['targets','sops','matrix'].includes(cur.dataset.v))show(cur.dataset.v);
-}).catch(()=>{});
+});
+
+/* Refresh now — re-pull every live source (Notion drafts + config) on demand,
+   re-render the open view, and stamp the time. The analytics charts are a
+   weekly snapshot baked at build time and are not part of this live pull. */
+const refreshBtn=document.getElementById('refreshBtn');
+if(refreshBtn)refreshBtn.innerHTML=ICO.refresh;
+function stampRefreshed(){
+  const el=document.getElementById('lastRefreshed'); if(!el)return;
+  const d=new Date(),p=n=>(''+n).padStart(2,'0');
+  el.textContent='Refreshed '+p(d.getHours())+':'+p(d.getMinutes());
+}
+let _refreshing=false;
+async function refreshNow(){
+  if(_refreshing)return; _refreshing=true;
+  if(refreshBtn)refreshBtn.classList.add('spinning');
+  try{
+    await loadConfig(true);
+    const cur=document.querySelector('#nav button.on');
+    const v=cur?cur.dataset.v:'overview';
+    show(v);
+    if(v!=='score')refreshLive(false);
+    stampRefreshed();
+  }finally{
+    if(refreshBtn)refreshBtn.classList.remove('spinning');
+    _refreshing=false;
+  }
+}
+if(refreshBtn)refreshBtn.addEventListener('click',refreshNow);
 </script>
 
 <!-- Pulse dashboard · deployed on Vercel -->
